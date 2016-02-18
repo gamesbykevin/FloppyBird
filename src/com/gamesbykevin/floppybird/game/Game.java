@@ -11,6 +11,7 @@ import com.gamesbykevin.androidframework.resources.Audio;
 import com.gamesbykevin.androidframework.resources.Font;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
+import com.gamesbykevin.floppybird.bird.Bird;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.screen.OptionsScreen;
 import com.gamesbykevin.floppybird.screen.ScreenManager;
@@ -47,6 +48,9 @@ public final class Game implements IGame
     //the duration we want to vibrate the phone for
     private static final long VIBRATION_DURATION = 500L;
     
+    //our bird
+    private Bird bird;
+    
     /**
      * Create our game object
      * @param screen The main screen
@@ -59,6 +63,9 @@ public final class Game implements IGame
         
         //create a new score board
         this.scoreboard = new Score(screen.getScreenOptions(), screen.getPanel().getActivity());
+        
+        //create our bird
+        this.bird = new Bird();
     }
     
     /**
@@ -68,6 +75,15 @@ public final class Game implements IGame
     public ScreenManager getScreen()
     {
         return this.screen;
+    }
+    
+    /**
+     * Get the bird
+     * @return The bird in play
+     */
+    public Bird getBird()
+    {
+    	return this.bird;
     }
     
     /**
@@ -111,11 +127,16 @@ public final class Game implements IGame
         	//flag game over false
         	setGameover(false);
         	
+        	if (getBird() != null)
+        		getBird().reset();
+        	
     		//reset depending on the game mode
+        	/**
     		switch (getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Mode))
     		{
     		
     		}
+    		*/
     	}
     }
     
@@ -231,6 +252,10 @@ public final class Game implements IGame
         }
         else
         {
+        	if (getBird() != null)
+        		getBird().update();
+        	
+        	/*
 			//if the game hasn't been flagged over
 			if (!hasGameover())
 			{
@@ -240,6 +265,7 @@ public final class Game implements IGame
         		//change the state
         		getScreen().setState(State.GameOver);
 			}
+			*/
         }
     }
     
@@ -277,7 +303,8 @@ public final class Game implements IGame
     	}
     	else
     	{
-    		
+    		if (getBird() != null)
+    			getBird().render(canvas);
     	}
     }
     
@@ -290,6 +317,12 @@ public final class Game implements IGame
         {
         	this.scoreboard.dispose();
         	this.scoreboard = null;
+        }
+        
+        if (this.bird != null)
+        {
+        	this.bird.dispose();
+        	this.bird = null;
         }
     }
 }

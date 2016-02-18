@@ -13,7 +13,6 @@ import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.androidframework.screen.Screen;
 import com.gamesbykevin.floppybird.MainActivity;
 import com.gamesbykevin.floppybird.assets.Assets;
-import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.storage.settings.Settings;
 
 /**
@@ -37,7 +36,7 @@ public class OptionsScreen implements Screen, Disposable
     //buttons to access each button in the list
     public enum Key
     {
-    	Back, Sound, Vibrate, Instructions, Facebook, Twitter, Mode
+    	Back, Sound, Vibrate, Instructions, Facebook, Twitter
     }
     
     public OptionsScreen(final ScreenManager screen)
@@ -59,15 +58,11 @@ public class OptionsScreen implements Screen, Disposable
         addButtonSound(x, y);
         
         //add vibrate option
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButtonVibrate(x, y);
         
-        //add mode button
-        y += ScreenManager.BUTTON_Y_INCREMENT;
-        addButtonMode(x, y);
-        
         //the back button
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButtonBack(x, y);
         
         //add social media icons after the above, because the dimensions are different
@@ -122,18 +117,18 @@ public class OptionsScreen implements Screen, Disposable
     private void addIcons()
     {
         Button tmp = new Button(Images.getImage(Assets.ImageMenuKey.Instructions));
-        tmp.setX(60);
-        tmp.setY(GamePanel.HEIGHT - (MenuScreen.ICON_DIMENSION * 1.25));
+        tmp.setX(MenuScreen.ICON_X_INSTRUCTIONS);
+        tmp.setY(MenuScreen.ICON_Y);
         this.buttons.put(Key.Instructions, tmp);
         
         tmp = new Button(Images.getImage(Assets.ImageMenuKey.Facebook));
-        tmp.setX(195);
-        tmp.setY(GamePanel.HEIGHT - (MenuScreen.ICON_DIMENSION * 1.25));
+        tmp.setX(MenuScreen.ICON_X_FACEBOOK);
+        tmp.setY(MenuScreen.ICON_Y);
         this.buttons.put(Key.Facebook, tmp);
         
         tmp = new Button(Images.getImage(Assets.ImageMenuKey.Twitter));
-        tmp.setX(330);
-        tmp.setY(GamePanel.HEIGHT - (MenuScreen.ICON_DIMENSION * 1.25));
+        tmp.setX(MenuScreen.ICON_X_TWITTER);
+        tmp.setY(MenuScreen.ICON_Y);
         this.buttons.put(Key.Twitter, tmp);
     }
     
@@ -156,16 +151,6 @@ public class OptionsScreen implements Screen, Disposable
         this.buttons.put(Key.Sound, button);
     }
 
-    private void addButtonMode(final int x, final int y)
-    {
-        Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
-        button.addDescription("Mode: React");
-        button.addDescription("Mode: Capture");
-        button.setX(x);
-        button.setY(y);
-        this.buttons.put(Key.Mode, button);
-    }
-    
     private void addButtonVibrate(final int x, final int y)
     {
         Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
@@ -216,7 +201,6 @@ public class OptionsScreen implements Screen, Disposable
 						case Back:
 						case Sound:
 						case Vibrate:
-						case Mode:
 							button.positionText(getScreen().getPaint());
 							break;
 							
@@ -279,7 +263,6 @@ public class OptionsScreen implements Screen, Disposable
     	                //no need to continue
     	                return false;
     	                
-    				case Mode:
     				case Vibrate:
     					//change index
     					button.setIndex(button.getIndex() + 1);
@@ -377,7 +360,6 @@ public class OptionsScreen implements Screen, Disposable
 	    			case Back:
 	    			case Sound:
 	    			case Vibrate:
-	    			case Mode:
 	    				buttons.get(key).render(canvas, getScreen().getPaint());
 	    				break;
 	    				

@@ -34,7 +34,7 @@ public class Score extends Internal
         try
         {
             //get the # of the modes in the settings
-            final int length = screen.getButtons().get(OptionsScreen.Key.Mode).getDescriptions().size();
+            final int length = 0;//screen.getButtons().get(OptionsScreen.Key.Mode).getDescriptions().size();
             
             //if content exists load it
             if (super.getContent().toString().trim().length() > 0)

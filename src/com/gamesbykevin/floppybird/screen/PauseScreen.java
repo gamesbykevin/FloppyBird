@@ -1,6 +1,7 @@
 package com.gamesbykevin.floppybird.screen;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
@@ -41,6 +42,7 @@ public class PauseScreen implements Screen, Disposable
         
         //create paint text object
         this.paint = new Paint(screen.getPaint());
+        this.paint.setColor(Color.WHITE);
         this.paint.setTextSize(DEFAULT_FONT_SIZE);
         
         //create temporary rectangle

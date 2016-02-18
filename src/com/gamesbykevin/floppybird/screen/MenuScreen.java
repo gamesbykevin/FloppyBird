@@ -53,7 +53,7 @@ public class MenuScreen implements Screen, Disposable
     /**
      * Button text to display for more games
      */
-    public static final String BUTTON_TEXT_MORE_GAMES = "More Games";
+    public static final String BUTTON_TEXT_MORE_GAMES = "More";
     
     private enum Key
     {
@@ -66,17 +66,37 @@ public class MenuScreen implements Screen, Disposable
     /**
      * Dimension of the standard menu button
      */
-    public static final int BUTTON_WIDTH = 300;
+    public static final int BUTTON_WIDTH = 150;
     
     /**
      * Dimension of the standard menu button
      */
-    public static final int BUTTON_HEIGHT = 65;
+    public static final int BUTTON_HEIGHT = 59;
     
     /**
      * The size of our icon buttons
      */
     public static final int ICON_DIMENSION = 90;
+    
+    /**
+     * x-coordinate for the instructions icon
+     */
+    public static final int ICON_X_INSTRUCTIONS = GamePanel.WIDTH - (int)(MenuScreen.ICON_DIMENSION * 4.5);
+    
+    /**
+     * x-coordinate for the facebook icon
+     */
+    public static final int ICON_X_FACEBOOK = GamePanel.WIDTH - (int)(MenuScreen.ICON_DIMENSION * 3.0);
+    
+    /**
+     * x-coordinate for the twitter icon
+     */
+    public static final int ICON_X_TWITTER = GamePanel.WIDTH - (int)(MenuScreen.ICON_DIMENSION * 1.5);
+    
+    /**
+     * y-coordinate for the icons
+     */
+    public static final int ICON_Y = GamePanel.HEIGHT - (int)(MenuScreen.ICON_DIMENSION * 1.25);
     
     public MenuScreen(final ScreenManager screen)
     {
@@ -96,26 +116,27 @@ public class MenuScreen implements Screen, Disposable
         
         addButton(x, y, BUTTON_TEXT_START_GAME, Key.Start, imageKey);
         
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButton(x, y, BUTTON_TEXT_OPTIONS, Key.Settings, imageKey);
         
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButton(x, y, BUTTON_TEXT_RATE_APP, Key.Rate, imageKey);
         
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButton(x, y, BUTTON_TEXT_MORE_GAMES, Key.More, imageKey);
         
+        x = ScreenManager.BUTTON_X;
         y += ScreenManager.BUTTON_Y_INCREMENT;
         addButton(x, y, BUTTON_TEXT_EXIT_GAME, Key.Exit, imageKey);
         
-        x = 60;
-        y = GamePanel.HEIGHT - (ICON_DIMENSION * 1.25);
+        x = ICON_X_INSTRUCTIONS;
+        y = ICON_Y;
         addButton(x, y, Key.Instructions, Assets.ImageMenuKey.Instructions);
         
-        x = 195;
+        x = ICON_X_FACEBOOK;
         addButton(x, y, Key.Facebook, Assets.ImageMenuKey.Facebook);
         
-        x = 330;
+        x = ICON_X_TWITTER;
         addButton(x, y, Key.Twitter, Assets.ImageMenuKey.Twitter);
         
         //set the size and bounds of the buttons

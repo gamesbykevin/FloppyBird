@@ -71,20 +71,14 @@ public class Assets
      */
     public enum ImageMenuKey
     {
-    	/*
-    	Background, 
     	Button, 
     	Cancel, 
     	Confirm,
     	Facebook, 
-    	Instructions, 
-    	Twitter, 
-    	GameOver,
-    	Logo, 
-    	NewRecord, 
-    	Splash, 
-    	Winner
-    	*/
+    	Instructions,
+    	Logo,
+    	Splash,
+    	Twitter
     }
     
     /**
@@ -93,7 +87,7 @@ public class Assets
      */
     public enum ImageGameKey
     {
-    	//Balls, Explosion, Hint1, Hint2
+    	bird1, bird2, bird3, bird4, pipe, pipe1, sheet
     }
     
     /**
@@ -111,7 +105,7 @@ public class Assets
      */
     public enum AudioMenuKey
     {
-    	//Selection, Theme 
+    	Selection 
     }
     
     /**

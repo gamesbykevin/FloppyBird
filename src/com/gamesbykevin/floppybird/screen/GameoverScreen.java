@@ -32,15 +32,10 @@ public class GameoverScreen implements Screen, Disposable
     private Paint paint;
     
     //the messages to display
-    private String message = "", message2 = "";
+    private String message = "";
     
     //where we draw the images and text
-    private int imageX = 0, imageY = 0;
     private int messageX = 0, messageY = 0;
-    private int message2X = 0, message2Y = 0;
-    
-    //image to render
-    private Bitmap image;
     
     //time we have displayed text
     private long time;
@@ -48,7 +43,7 @@ public class GameoverScreen implements Screen, Disposable
     /**
      * The amount of time to wait until we render the game over menu
      */
-    private static final long DELAY_MENU_DISPLAY = 2750L;
+    private static final long DELAY_MENU_DISPLAY = 1250L;
     
     //do we display the menu
     private boolean display = false;
@@ -86,15 +81,15 @@ public class GameoverScreen implements Screen, Disposable
         
         //the start location of the button
         int y = ScreenManager.BUTTON_Y;
-        int x = (GamePanel.WIDTH / 2) - (MenuScreen.BUTTON_WIDTH / 2);
+        int x = ScreenManager.BUTTON_X;
 
         //create our buttons
         addButton(x, y, Key.Restart, BUTTON_TEXT_NEW_GAME);
         
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButton(x, y, Key.Menu, BUTTON_TEXT_MENU);
         
-        y += ScreenManager.BUTTON_Y_INCREMENT;
+        x += ScreenManager.BUTTON_X_INCREMENT;
         addButton(x, y, Key.Rate, MenuScreen.BUTTON_TEXT_RATE_APP);
     }
     
@@ -162,7 +157,6 @@ public class GameoverScreen implements Screen, Disposable
     {
         //assign the message(s)
         this.message = message;
-        this.message2 = message2;
         
         //update restart text
         this.buttons.get(Key.Restart).setDescription(0, restartText);
@@ -175,7 +169,7 @@ public class GameoverScreen implements Screen, Disposable
         {
 	        //assign metrics
         	this.paint = new Paint();
-        	this.paint.setTypeface(Font.getFont(Assets.FontGameKey.Default));
+        	//this.paint.setTypeface(Font.getFont(Assets.FontGameKey.Default));
         	this.paint.setColor(Color.WHITE);
         	this.paint.setTextSize(64f);
         }
@@ -186,23 +180,6 @@ public class GameoverScreen implements Screen, Disposable
         //calculate the position of the message
         this.messageX = (GamePanel.WIDTH / 2) - (tmp.width() / 2);
         this.messageY = (int)buttons.get(Key.Rate).getY() + 175;
-        this.message2X = this.messageX;
-        this.message2Y = this.messageY + tmp.height() + (int)(tmp.height() * 1.5);
-        
-        if (!record)
-        {
-	        //determine which image we show
-	        this.image = (win) ? Images.getImage(Assets.ImageMenuKey.Winner) : Images.getImage(Assets.ImageMenuKey.GameOver);
-        }
-        else
-        {
-        	//assign the new record image
-        	this.image = Images.getImage(Assets.ImageMenuKey.NewRecord);
-        }
-        
-        //position image accordingly
-    	this.imageX = (GamePanel.WIDTH / 2) - (this.image.getWidth() / 2);
-        this.imageY = (int)(GamePanel.HEIGHT * .022);
     }
     
     /**
@@ -321,13 +298,8 @@ public class GameoverScreen implements Screen, Disposable
             //only darken the background when the menu is displayed
             ScreenManager.darkenBackground(canvas);
             
-            //draw the image if it exists
-            if (this.image != null)
-            	canvas.drawBitmap(this.image, this.imageX, this.imageY, this.paint);
-            
-            //render messages
+            //render message(s)
             canvas.drawText(this.message, messageX, messageY, this.paint);
-            canvas.drawText(this.message2, message2X, message2Y, this.paint);
         
             //render the buttons
             for (Key key : Key.values())

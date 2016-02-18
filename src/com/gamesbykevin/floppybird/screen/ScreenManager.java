@@ -10,6 +10,7 @@ import com.gamesbykevin.androidframework.resources.Disposable;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.androidframework.screen.Screen;
 import com.gamesbykevin.floppybird.assets.Assets;
+import com.gamesbykevin.floppybird.background.Background;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 
 import java.util.HashMap;
@@ -43,32 +44,32 @@ public final class ScreenManager implements Screen, Disposable
     /**
      * The x-coordinate where we want the logo to be displayed
      */
-    public static final int LOGO_X = 2;
+    public static final int LOGO_X = 25;
     
     /**
      * The y-coordinate where we want the logo to be displayed
      */
-    public static final int LOGO_Y = 25;
+    public static final int LOGO_Y = 50;
     
     /**
      * The x-coordinate where we want to start putting the buttons
      */
-    public static final int BUTTON_X = 90;
+    public static final int BUTTON_X = 40;
     
     /**
      * The y-coordinate where we want to start putting the buttons
      */
-    public static final int BUTTON_Y = 145;
+    public static final int BUTTON_Y = 250;
     
     /**
      * The y-coordinate spacing between each button
      */
-    public static final int BUTTON_Y_INCREMENT = MenuScreen.BUTTON_HEIGHT + (int)(MenuScreen.BUTTON_HEIGHT * .5);
+    public static final int BUTTON_Y_INCREMENT = MenuScreen.BUTTON_HEIGHT + (int)(MenuScreen.BUTTON_HEIGHT * .25);
     
     /**
      * The y-coordinate spacing between each button
      */
-    public static final int BUTTON_X_INCREMENT = MenuScreen.BUTTON_WIDTH + (int)(MenuScreen.BUTTON_WIDTH * .5);
+    public static final int BUTTON_X_INCREMENT = MenuScreen.BUTTON_WIDTH + (int)(MenuScreen.BUTTON_WIDTH * .25);
     
     /**
      * The alpha visibility to apply when darkening the background
@@ -78,7 +79,10 @@ public final class ScreenManager implements Screen, Disposable
     /**
      * Default font size
      */
-    public static final float DEFAULT_FONT_SIZE = 44f;
+    public static final float DEFAULT_FONT_SIZE = 20f;
+    
+    //the scrolling background
+    private Background background;
     
     /**
      * Create our main screen
@@ -100,6 +104,9 @@ public final class ScreenManager implements Screen, Disposable
         
         //default to the ready state
         setState(State.Ready);
+        
+        //create the background
+        this.background = new Background();
     }
     
     @Override
@@ -126,7 +133,7 @@ public final class ScreenManager implements Screen, Disposable
             this.paint.setTextSize(DEFAULT_FONT_SIZE);
 
             //set the color
-            this.paint.setColor(Color.WHITE);
+            this.paint.setColor(Color.BLACK);
         }
         
         //return object
@@ -142,6 +149,10 @@ public final class ScreenManager implements Screen, Disposable
     {
     	//update current screen
         getScreen(getState()).update();
+        
+        if (background != null && getState() != State.Paused)
+        	background.update();
+        	
     }
     
     /**
@@ -217,7 +228,7 @@ public final class ScreenManager implements Screen, Disposable
 	        		Audio.stop();
 	        		
 	        		//play menu theme
-	        		Audio.play(Assets.AudioMenuKey.Theme, true);
+	        		//Audio.play(Assets.AudioMenuKey.Theme, true);
 	        	}
 	        }
 	        else if (state == State.Running)
@@ -226,7 +237,7 @@ public final class ScreenManager implements Screen, Disposable
 	        	Audio.stop();
 	        	
 	        	//play song
-	        	Audio.play(Assets.AudioGameKey.Music, true);
+	        	//Audio.play(Assets.AudioGameKey.Music, true);
 	        }
     	}
     	finally
@@ -244,7 +255,7 @@ public final class ScreenManager implements Screen, Disposable
             canvas.drawColor(Color.BLACK);
             
             //draw the background
-            canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.Background), 0, 0, null);
+            background.render(canvas);
             
             //render the game
             getScreenGame().render(canvas);
@@ -367,6 +378,12 @@ public final class ScreenManager implements Screen, Disposable
             
             screens.clear();
             screens = null;
+        }
+        
+        if (background != null)
+        {
+        	background.dispose();
+        	background = null;
         }
     }
 }

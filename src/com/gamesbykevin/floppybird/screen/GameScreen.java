@@ -36,12 +36,6 @@ public class GameScreen implements Screen, Disposable
         if (getGame() == null)
             this.game = new Game(screen);
         
-        //reset the player's score
-        getGame().getPlayer().setScore(0);
-        
-        //reset the level index
-        getGame().setLevelIndex(0);
-        
         //reset the game level
         getGame().setReset(true);
     }
