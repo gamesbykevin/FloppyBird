@@ -8,6 +8,7 @@ import com.gamesbykevin.floppybird.common.ICommon;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 public class Bird extends Entity implements ICommon
 {
@@ -19,26 +20,60 @@ public class Bird extends Entity implements ICommon
 	/**
 	 * The start y-coordinate for the bird
 	 */
-	public static final int START_Y = 75;
+	public static final int START_Y = 100;
 	
 	/**
 	 * The duration between each animation
 	 */
-	private static final long ANIMATION_DELAY = 250;
+	private static final long ANIMATION_DELAY = 75L;
 	
 	//rotation (degrees)
 	private float rotation = 0;
 	
+	/**
+	 * The number of pixels to climb when jumping
+	 */
+	private static final int JUMP_HEIGHT_MAX = -10;
+	
+	/**
+	 * The number of pixels to fall when falling
+	 */
+	private static final int DROP_HEIGHT_MAX = 22;
+	
+	//did the game start
+	private boolean start = false;
+	
+	/**
+	 * Default constructor to create a new bird
+	 */
 	public Bird()
 	{
 		//add these animations
-		addAnimation(Assets.ImageGameKey.bird1, 150, 103);
-		addAnimation(Assets.ImageGameKey.bird2, 150, 103);
-		addAnimation(Assets.ImageGameKey.bird3, 150, 108);
-		addAnimation(Assets.ImageGameKey.bird4, 150, 107);
+		addAnimation(Assets.ImageGameKey.bird1, 75, 52);
+		addAnimation(Assets.ImageGameKey.bird2, 75, 52);
+		addAnimation(Assets.ImageGameKey.bird3, 75, 54);
+		addAnimation(Assets.ImageGameKey.bird4, 75, 54);
 		
 		//reset
 		reset();
+	}
+	
+	/**
+	 * Flag the bird to start
+	 * @param start true = yes, false = no
+	 */
+	public final void setStart(final boolean start)
+	{
+		this.start = start;
+	}
+	
+	/**
+	 * Has the bird started
+	 * @return true = yes, false = no
+	 */
+	public final boolean hasStart()
+	{
+		return this.start;
 	}
 	
 	/**
@@ -71,6 +106,8 @@ public class Bird extends Entity implements ICommon
 	 */
 	public final void reset()
 	{
+		setStart(false);
+		
 		//reset location
 		setX(START_X);
 		setY(START_Y);
@@ -130,15 +167,72 @@ public class Bird extends Entity implements ICommon
 		super.dispose();
 	}
 	
+	/**
+	 * Jump the bird
+	 */
+	public final void jump()
+	{
+		//flag start true
+		setStart(true);
+		
+		//set the y-velocity
+		super.setDY(JUMP_HEIGHT_MAX);
+		
+		//reset the current animation
+		super.getSpritesheet().get().reset();
+	}
+	
 	@Override
 	public void update() throws Exception 
 	{
+		//if we did not start
+		if (!hasStart())
+			return;
 		
+		//update the y-coordinate
+		setY(getY() + getDY());
+		
+		//increase the y-velocity
+		setDY(getDY() + 1);
+		
+		//limit how fast we can jump
+		if (getDY() < JUMP_HEIGHT_MAX)
+			setDY(JUMP_HEIGHT_MAX);
+		
+		//limit how fast we can fall
+		if (getDY() > DROP_HEIGHT_MAX)
+			setDY(DROP_HEIGHT_MAX);
+		
+		//update the rotation based on the y-velocity
+		updateRotation();
+		
+		//update the animation
+		getSpritesheet().update();
+	}
+	
+	/**
+	 * Rotate the bird depending on the current y-velocity
+	 */
+	private void updateRotation()
+	{
+		//determine the velocity range
+		final float range = ((float)DROP_HEIGHT_MAX - (float)JUMP_HEIGHT_MAX);
+		
+		//find out how far we are from the DROP_HEIGHT_MAX
+		final float current = (float)DROP_HEIGHT_MAX - (float)getDY();
+		
+		//find out how much we have progressed towards the full range
+		final float progress = (current / range);
+		
+		//now we can assign the rotation
+		setRotation(45 - (90 * progress));
 	}
 	
 	@Override
 	public void render(final Canvas canvas) throws Exception
 	{
+		canvas.drawRect(getDestination(), new Paint());
+		
 		//save the canvas here so the rotation changes below only affect this object
 		canvas.save(Canvas.MATRIX_SAVE_FLAG);
 		

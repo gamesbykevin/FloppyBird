@@ -142,24 +142,13 @@ public class GameoverScreen implements Screen, Disposable
     }
     
     /**
-     * Assign the message(s)
-     * @param win Did we win the level etc...?
-     * @param record Is this a personal best record
+     * Assign the message
      * @param message The message we want displayed
-     * @param restartText The text to be displayed for the restart button
      */
-    public void setMessage(
-    	final boolean win, 
-    	final boolean record, 
-    	final String message, 
-    	final String message2, 
-    	final String restartText)
+    public void setMessage(final String message)
     {
         //assign the message(s)
         this.message = message;
-        
-        //update restart text
-        this.buttons.get(Key.Restart).setDescription(0, restartText);
         
         //create temporary rectangle
         Rect tmp = new Rect();
@@ -219,7 +208,7 @@ public class GameoverScreen implements Screen, Disposable
         			continue;
         		
                 //remove messages
-                setMessage(false, false, "", "", "");
+                setMessage("");
                 
         		//handle each button different
         		switch (key)

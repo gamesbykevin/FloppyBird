@@ -150,9 +150,9 @@ public final class ScreenManager implements Screen, Disposable
     	//update current screen
         getScreen(getState()).update();
         
-        if (background != null && getState() != State.Paused)
-        	background.update();
-        	
+        //only update the scrolling when playing the game
+        if (getState() == State.Running)
+        	this.background.update();
     }
     
     /**

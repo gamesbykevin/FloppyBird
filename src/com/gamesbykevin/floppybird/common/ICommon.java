@@ -13,6 +13,11 @@ public interface ICommon extends Disposable
 	public void update() throws Exception;
 
 	/**
+	 * Logic to reset
+	 */
+	public void reset();
+	
+	/**
 	 * Render the entity
 	 * @param canvas Object used to render pixels
 	 */

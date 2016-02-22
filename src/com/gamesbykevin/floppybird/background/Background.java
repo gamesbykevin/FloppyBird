@@ -11,12 +11,20 @@ import android.graphics.Canvas;
 
 public class Background extends Entity implements ICommon
 {
+	/**
+	 * The height of the ground
+	 */
+	public static final int GROUND_HEIGHT = 58;
+	
+	/**
+	 * The Key for each image etc...
+	 */
 	private enum Key
 	{
-		Ground(0, 1002, 800, 58, GROUND_Y), 
-		Sky(0, 0, 800, 450, SKY_Y), 
-		Cloud(0, 450, 800, 447, CLOUD_Y), 
-		Bush(0, 897, 800, 105, BUSH_Y);
+		Ground(0, 1002, 800, GROUND_HEIGHT, 422, true), 
+		Sky(0, 0, 800, 450, 0, false), 
+		Cloud(0, 450, 800, 447, 0, true), 
+		Bush(0, 897, 800, 105, 351, true);
 		
 		//where the animation is located
 		private final int animationX, animationY, animationW, animationH;
@@ -24,12 +32,18 @@ public class Background extends Entity implements ICommon
 		//the current x position
 		private int x, y;
 		
-		private Key(int animationX, int animationY, int animationW, int animationH, int startY)
+		//do we scroll
+		private boolean scroll;
+		
+		private Key(int animationX, int animationY, int animationW, int animationH, int startY, boolean scroll)
 		{
 			this.animationX = animationX;
 			this.animationY = animationY;
 			this.animationW = animationW;
 			this.animationH = animationH;
+			
+			//do we scroll this
+			this.scroll = scroll;
 			
 			//set starting position
 			setX(DEFAULT_X);
@@ -73,17 +87,18 @@ public class Background extends Entity implements ICommon
 		}
 	}
 	
-	//default locations for each animation
+	/**
+	 * Default x-coordinate for each animation
+	 */
 	private static final int DEFAULT_X = 0;
-	private static final int BUSH_Y = 351;
-	private static final int GROUND_Y = 422;
-	private static final int SKY_Y = 0;
-	private static final int CLOUD_Y = 0;
 	
 	/**
 	 * The speed at which the ground/bushes move
 	 */
-	public static final int DEFAULT_SCROLL_X = 5;
+	public static final int DEFAULT_X_SCROLL = 10;
+	
+	//the current scroll speed
+	private int scrollX = 0;
 	
 	public Background() 
 	{
@@ -94,14 +109,38 @@ public class Background extends Entity implements ICommon
 		addAnimation(Key.Cloud);
 		addAnimation(Key.Ground);
 		addAnimation(Key.Sky);
+		
+		//reset
+		reset();
 	}
 	
-	public void reset()
+	public final void reset()
 	{
 		for (Key key : Key.values())
 		{
 			key.setX(DEFAULT_X);
 		}
+		
+		//assign the scroll speed
+		setScrollX(DEFAULT_X_SCROLL);
+	}
+	
+	/**
+	 * Assign the x scroll speed
+	 * @param scrollX The speed to scroll the x-coordinate
+	 */
+	public void setScrollX(final int scrollX)
+	{
+		this.scrollX = scrollX;
+	}
+	
+	/**
+	 * Get the scroll speed
+	 * @return The speed to scroll the x-coordinate
+	 */
+	public int getScrollX()
+	{
+		return this.scrollX;
 	}
 	
 	/**
@@ -138,15 +177,19 @@ public class Background extends Entity implements ICommon
 	@Override
 	public void update() throws Exception 
 	{
-		//update the scroll position of some of the objects
-		Key.Ground.setX(Key.Ground.getX() - DEFAULT_SCROLL_X);
-		Key.Bush.setX(Key.Bush.getX() - DEFAULT_SCROLL_X);
-		
-		//adjust if moving off the screen
-		if (Key.Ground.getX() < 0)
-			Key.Ground.setX(GamePanel.WIDTH);
-		if (Key.Bush.getX() < 0)
-			Key.Bush.setX(GamePanel.WIDTH);
+		for (Key key : Key.values())
+		{
+			//if we are to scroll the animation
+			if (key.scroll)
+			{
+				//update x-coordinate
+				key.setX(key.getX() - getScrollX());
+				
+				//adjust if we move off the screen
+				if (key.getX() < 0)
+					key.setX(GamePanel.WIDTH);
+			}
+		}
 	}
 	
 	@Override
@@ -181,8 +224,8 @@ public class Background extends Entity implements ICommon
 		{
 			case Bush:
 			case Ground:
+			case Cloud:
 				super.setY(key.getY());
-				
 				super.setX(key.getX());
 				super.render(canvas);
 				super.setX(key.getX() + key.animationW);

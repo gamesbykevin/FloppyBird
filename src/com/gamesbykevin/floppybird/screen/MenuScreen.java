@@ -123,11 +123,11 @@ public class MenuScreen implements Screen, Disposable
         addButton(x, y, BUTTON_TEXT_RATE_APP, Key.Rate, imageKey);
         
         x += ScreenManager.BUTTON_X_INCREMENT;
-        addButton(x, y, BUTTON_TEXT_MORE_GAMES, Key.More, imageKey);
+        addButton(x, y, BUTTON_TEXT_EXIT_GAME, Key.Exit, imageKey);
         
         x = ScreenManager.BUTTON_X;
-        y += ScreenManager.BUTTON_Y_INCREMENT;
-        addButton(x, y, BUTTON_TEXT_EXIT_GAME, Key.Exit, imageKey);
+        y += ScreenManager.BUTTON_Y_INCREMENT + (ScreenManager.BUTTON_Y_INCREMENT * .25);
+        addButton(x, y, BUTTON_TEXT_MORE_GAMES, Key.More, imageKey);
         
         x = ICON_X_INSTRUCTIONS;
         y = ICON_Y;

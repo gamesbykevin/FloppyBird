@@ -11,8 +11,10 @@ import com.gamesbykevin.androidframework.resources.Audio;
 import com.gamesbykevin.androidframework.resources.Font;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
+import com.gamesbykevin.floppybird.background.Background;
 import com.gamesbykevin.floppybird.bird.Bird;
 import com.gamesbykevin.floppybird.panel.GamePanel;
+import com.gamesbykevin.floppybird.pipes.Pipes;
 import com.gamesbykevin.floppybird.screen.OptionsScreen;
 import com.gamesbykevin.floppybird.screen.ScreenManager;
 import com.gamesbykevin.floppybird.screen.ScreenManager.State;
@@ -29,9 +31,6 @@ public final class Game implements IGame
     
     //paint object to draw text
     private Paint paint;
-    
-    //the paint object we use to render the hint
-    private Paint paintHint;
     
     //is the game being reset
     private boolean reset = false;
@@ -51,6 +50,9 @@ public final class Game implements IGame
     //our bird
     private Bird bird;
     
+    //collection of pipes
+    private Pipes pipes;
+    
     /**
      * Create our game object
      * @param screen The main screen
@@ -66,6 +68,9 @@ public final class Game implements IGame
         
         //create our bird
         this.bird = new Bird();
+        
+        //create our pipes container
+        this.pipes = new Pipes();
     }
     
     /**
@@ -84,6 +89,15 @@ public final class Game implements IGame
     public Bird getBird()
     {
     	return this.bird;
+    }
+    
+    /**
+     * Get the pipes
+     * @return The container for the pipes in play
+     */
+    public Pipes getPipes()
+    {
+    	return this.pipes;
     }
     
     /**
@@ -129,6 +143,9 @@ public final class Game implements IGame
         	
         	if (getBird() != null)
         		getBird().reset();
+        	
+        	if (getPipes() != null)
+        		getPipes().reset();
         	
     		//reset depending on the game mode
         	/**
@@ -201,21 +218,6 @@ public final class Game implements IGame
         return this.paint;
     }
     
-    /**
-     * Get the paint object
-     * @return The paint object we use for the hint
-     */
-    private Paint getPaintHint()
-    {
-    	if (this.paintHint == null)
-    	{
-    		this.paintHint = new Paint();
-    		this.paintHint.setAlpha(255);
-    	}
-    	
-    	return this.paintHint;
-    }
-    
     @Override
     public void update(final int action, final float x, final float y) throws Exception
     {
@@ -223,12 +225,25 @@ public final class Game implements IGame
     	if (hasReset())
     		return;
     	
+    	//if the game is over, we can't continue
+    	if (hasGameover())
+    		return;
+    	
     	if (action == MotionEvent.ACTION_UP)
     	{
-    		
+    		if (getBird() != null)
+    		{
+    			//did the bird start yet
+    			final boolean started = getBird().hasStart();
+    			
+    			//start jumping
+    			getBird().jump();
+    			
+    			if (!started)
+    				getPipes().resetTime();
+    		}
     	}
-    	
-		if (action == MotionEvent.ACTION_DOWN)
+    	else if (action == MotionEvent.ACTION_DOWN)
 		{
 			
 		}
@@ -252,27 +267,61 @@ public final class Game implements IGame
         }
         else
         {
-        	if (getBird() != null)
-        		getBird().update();
-        	
-        	/*
-			//if the game hasn't been flagged over
+			//if the game hasn't been flagged game over yet
 			if (!hasGameover())
 			{
-				//flag game over true
-				setGameover(true);
-				
-        		//change the state
-        		getScreen().setState(State.GameOver);
+	        	if (getBird() != null)
+	        	{
+	        		//check if the bird hit the ground
+	        		if (getBird().getY() + getBird().getHeight() >= GamePanel.HEIGHT - Background.GROUND_HEIGHT)
+	        		{
+	        			//position bird right above the ground
+	        			getBird().setY(GamePanel.HEIGHT - Background.GROUND_HEIGHT - getBird().getHeight());
+	        			
+	    				//flag game over true
+	    				setGameover(true);
+	    				
+	            		//change the state
+	            		getScreen().setState(State.GameOver);
+	            		
+	            		getScreen().getScreenGameover().setMessage("Game Over");
+	        		}
+	        		else
+	        		{
+	        			if (getPipes() != null)
+	        			{
+		        			//check if the bird hit any pipes
+		        			if (getPipes().hasCollision(getBird()))
+		        			{
+			    				//flag game over true
+			    				setGameover(true);
+			    				
+			            		//change the state
+			            		getScreen().setState(State.GameOver);
+			            		
+			            		getScreen().getScreenGameover().setMessage("Game Over");
+		        			}
+	        			}
+	        		}
+	        	}
+
+	        	if (!hasGameover())
+	        	{
+		        	//update the bird
+	        		getBird().update();
+	        		
+	        		//make sure the bird has started before updating the pipes
+		        	if (getBird().hasStart())
+		        		getPipes().update();
+	        	}
 			}
-			*/
         }
     }
     
     /**
      * Vibrate the phone if the setting is enabled
      */
-    private void vibrate()
+    public void vibrate()
     {
 		//make sure vibrate option is enabled
 		if (getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Vibrate) == 0)
@@ -296,13 +345,15 @@ public final class Game implements IGame
     	if (hasReset())
     	{
 			//render loading screen
-			//canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.Splash), 0, 0, null);
+			canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.Splash), 0, 0, null);
 			
 			//flag that the user has been notified
 			setNotify(true);
     	}
     	else
     	{
+        	if (getPipes() != null)
+        		getPipes().render(canvas);
     		if (getBird() != null)
     			getBird().render(canvas);
     	}
