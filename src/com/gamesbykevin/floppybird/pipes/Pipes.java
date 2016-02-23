@@ -3,15 +3,14 @@ package com.gamesbykevin.floppybird.pipes;
 import java.util.ArrayList;
 
 import com.gamesbykevin.androidframework.anim.Animation;
-import com.gamesbykevin.androidframework.base.Entity;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.background.Background;
 import com.gamesbykevin.floppybird.common.ICommon;
+import com.gamesbykevin.floppybird.entity.Entity;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
 
 public final class Pipes extends Entity implements ICommon 
 {
@@ -48,6 +47,26 @@ public final class Pipes extends Entity implements ICommon
 	 * The number of pipes allowed in the array list
 	 */
 	private static final int PIPE_MAX = 5;
+	
+	/**
+	 * Array of x-coordinates that make up the top pipe, used for collision detection
+	 */
+	private static final int[] PIPE_TOP_X_POINTS = new int[] {-33,31,31,42,42,35,-37,-45,-45,-33};
+	
+	/**
+	 * Array of y-coordinates that make up the top pipe, used for collision detection
+	 */
+	private static final int[] PIPE_TOP_Y_POINTS = new int[] {-240,-240,205,211,230,240,240,231,211,204};
+	
+	/**
+	 * Array of x-coordinates that make up the bottom pipe, used for collision detection
+	 */
+	private static final int[] PIPE_BOTTOM_X_POINTS = new int[] {-37,35,42,42,31,31,-33,-33,-45,-45};
+	
+	/**
+	 * Array of y-coordinates that make up the bottom pipe, used for collision detection
+	 */
+	private static final int[] PIPE_BOTTOM_Y_POINTS = new int[] {-240,-240,-232,-215,-206,240,240,-206,-215,-232};
 	
 	/**
 	 * This class will control the pipes in the game
@@ -117,12 +136,6 @@ public final class Pipes extends Entity implements ICommon
 	 */
 	public boolean hasCollision(final Entity entity)
 	{
-		//locate the 4 corners of the entity
-		final int x1 = (int)(entity.getX());
-		final int y1 = (int)(entity.getY());
-		final int x2 = (int)(entity.getX() + entity.getWidth());
-		final int y2 = (int)(entity.getY() + entity.getHeight());
-		
 		for (Pipe pipe : getPipes())
 		{
 			//if the pipe is paused, we don't need to check
@@ -130,36 +143,33 @@ public final class Pipes extends Entity implements ICommon
 				continue;
 			
 			//if the pipe is not close enough to the entity, we will skip it
-			if (pipe.x > x2)
+			if (pipe.x > entity.getX() + entity.getWidth())
 				continue;
-			if (pipe.x + getWidth() < x1)
+			if (pipe.x + getWidth() < entity.getX())
 				continue;
+			
+			//make sure the entity's outline is updated before checking collision
+			entity.updateOutline();
 			
 			//set the location of the top pipe
 			super.setX(pipe.x);
 			super.setY(pipe.yTop);
 			
-			//if the entity intersects the top pipe, we have collision
-			if (getDestination().contains(x1, y1))
-				return true;
-			if (getDestination().contains(x1, y2))
-				return true;
-			if (getDestination().contains(x2, y1))
-				return true;
-			if (getDestination().contains(x2, y2))
+			//update the outline
+			updateOutline(PIPE_TOP_X_POINTS, PIPE_TOP_Y_POINTS);
+			
+			//if we have collision return true
+			if (super.hasCollision(entity))
 				return true;
 			
 			//set the location of the bottom pipe
 			super.setY(pipe.yBottom);
 			
-			//if the entity intersects the bottom pipe, we have collision
-			if (getDestination().contains(x1, y1))
-				return true;
-			if (getDestination().contains(x1, y2))
-				return true;
-			if (getDestination().contains(x2, y1))
-				return true;
-			if (getDestination().contains(x2, y2))
+			//update the outline
+			updateOutline(PIPE_BOTTOM_X_POINTS, PIPE_BOTTOM_Y_POINTS);
+			
+			//if we have collision return true
+			if (super.hasCollision(entity))
 				return true;
 		}
 		
@@ -274,17 +284,11 @@ public final class Pipes extends Entity implements ICommon
 			//render the top pipe
 			super.setY(pipe.yTop);
 			super.getSpritesheet().setKey(Key.PipeTop);
-			
-			canvas.drawRect(getDestination(), new Paint());
-			
 			super.render(canvas);
 			
 			//render the bottom pipe
 			super.setY(pipe.yBottom);
 			super.getSpritesheet().setKey(Key.PipeBottom);
-			
-			canvas.drawRect(getDestination(), new Paint());
-			
 			super.render(canvas);
 		}
 	}

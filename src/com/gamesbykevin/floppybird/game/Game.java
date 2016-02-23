@@ -270,50 +270,41 @@ public final class Game implements IGame
 			//if the game hasn't been flagged game over yet
 			if (!hasGameover())
 			{
-	        	if (getBird() != null)
-	        	{
-	        		//check if the bird hit the ground
-	        		if (getBird().getY() + getBird().getHeight() >= GamePanel.HEIGHT - Background.GROUND_HEIGHT)
-	        		{
-	        			//position bird right above the ground
-	        			getBird().setY(GamePanel.HEIGHT - Background.GROUND_HEIGHT - getBird().getHeight());
-	        			
-	    				//flag game over true
-	    				setGameover(true);
-	    				
-	            		//change the state
-	            		getScreen().setState(State.GameOver);
-	            		
-	            		getScreen().getScreenGameover().setMessage("Game Over");
-	        		}
-	        		else
-	        		{
-	        			if (getPipes() != null)
-	        			{
-		        			//check if the bird hit any pipes
-		        			if (getPipes().hasCollision(getBird()))
-		        			{
-			    				//flag game over true
-			    				setGameover(true);
-			    				
-			            		//change the state
-			            		getScreen().setState(State.GameOver);
-			            		
-			            		getScreen().getScreenGameover().setMessage("Game Over");
-		        			}
-	        			}
-	        		}
-	        	}
+	        	//update the bird
+        		getBird().update();
+        		
+        		//make sure the bird has started before updating the pipes
+	        	if (getBird().hasStart())
+	        		getPipes().update();
+	        	
+    			//check if the bird hit any pipes
+    			if (getPipes().hasCollision(getBird()))
+    			{
+    				//flag game over true
+    				setGameover(true);
+    				
+            		//change the state
+            		getScreen().setState(State.GameOver);
+            		
+            		//set default text, for now
+            		getScreen().getScreenGameover().setMessage("Game Over");
+    			}
+    			
+        		//check if the bird hit the ground
+        		if (getBird().getY() + getBird().getHeight() >= GamePanel.HEIGHT - Background.GROUND_HEIGHT)
+        		{
+        			//position bird right above the ground
+        			getBird().setY(GamePanel.HEIGHT - Background.GROUND_HEIGHT - getBird().getHeight());
+        			
+    				//flag game over true
+    				setGameover(true);
+    				
+            		//change the state
+            		getScreen().setState(State.GameOver);
 
-	        	if (!hasGameover())
-	        	{
-		        	//update the bird
-	        		getBird().update();
-	        		
-	        		//make sure the bird has started before updating the pipes
-		        	if (getBird().hasStart())
-		        		getPipes().update();
-	        	}
+            		//set default text, for now
+            		getScreen().getScreenGameover().setMessage("Game Over");
+        		}
 			}
         }
     }

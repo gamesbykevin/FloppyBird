@@ -1,14 +1,13 @@
 package com.gamesbykevin.floppybird.bird;
 
 import com.gamesbykevin.androidframework.anim.Animation;
-import com.gamesbykevin.androidframework.base.Entity;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.common.ICommon;
+import com.gamesbykevin.floppybird.entity.Entity;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
 
 public class Bird extends Entity implements ICommon
 {
@@ -27,9 +26,6 @@ public class Bird extends Entity implements ICommon
 	 */
 	private static final long ANIMATION_DELAY = 75L;
 	
-	//rotation (degrees)
-	private float rotation = 0;
-	
 	/**
 	 * The number of pixels to climb when jumping
 	 */
@@ -44,6 +40,16 @@ public class Bird extends Entity implements ICommon
 	private boolean start = false;
 	
 	/**
+	 * Array of x-coordinates that make up the bird, used for collision detection
+	 */
+	private static final int[] BIRD_X_POINTS = new int[] {-24, -13, 6, 17, 24, 24, 37, 27, 18, -1, -23, -25};
+	
+	/**
+	 * Array of y-coordinates that make up the bird, used for collision detection
+	 */
+	private static final int[] BIRD_Y_POINTS = new int[] {-4, -15, -17, -12, -5, 3, 10, 10, 14, 19, 10, 5};
+	
+	/**
 	 * Default constructor to create a new bird
 	 */
 	public Bird()
@@ -56,6 +62,8 @@ public class Bird extends Entity implements ICommon
 		
 		//reset
 		reset();
+		
+		super.updateOutline(BIRD_X_POINTS, BIRD_Y_POINTS);
 	}
 	
 	/**
@@ -143,24 +151,6 @@ public class Bird extends Entity implements ICommon
 		super.setHeight(getSpritesheet().get().getImage().getHeight());
 	}
 	
-	/**
-	 * Assign the rotation
-	 * @param rotation The desired rotation (degrees)
-	 */
-	public void setRotation(final float rotation)
-	{
-		this.rotation = rotation;
-	}
-	
-	/**
-	 * Get the rotation
-	 * @return The current rotation (degrees)
-	 */
-	public float getRotation()
-	{
-		return this.rotation;
-	}
-	
 	@Override
 	public void dispose()
 	{
@@ -191,6 +181,10 @@ public class Bird extends Entity implements ICommon
 		
 		//update the y-coordinate
 		setY(getY() + getDY());
+		
+		//keep the bird on the screen
+		if (getY() < 0)
+			setY(0);
 		
 		//increase the y-velocity
 		setDY(getDY() + 1);
@@ -231,8 +225,6 @@ public class Bird extends Entity implements ICommon
 	@Override
 	public void render(final Canvas canvas) throws Exception
 	{
-		canvas.drawRect(getDestination(), new Paint());
-		
 		//save the canvas here so the rotation changes below only affect this object
 		canvas.save(Canvas.MATRIX_SAVE_FLAG);
 		

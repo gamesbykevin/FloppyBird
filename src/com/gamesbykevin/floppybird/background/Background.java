@@ -97,6 +97,11 @@ public class Background extends Entity implements ICommon
 	 */
 	public static final int DEFAULT_X_SCROLL = 10;
 	
+	/**
+	 * The speed at which the clouds move
+	 */
+	public static final int CLOUD_X_SCROLL = 2;
+	
 	//the current scroll speed
 	private int scrollX = 0;
 	
@@ -182,6 +187,23 @@ public class Background extends Entity implements ICommon
 			//if we are to scroll the animation
 			if (key.scroll)
 			{
+				//determine the scroll speed
+				switch (key)
+				{
+					case Bush:
+					case Ground:
+						setScrollX(DEFAULT_X_SCROLL);
+						break;
+						
+					case Cloud:
+						setScrollX(CLOUD_X_SCROLL);
+						break;
+					
+					default:
+						setScrollX(DEFAULT_X_SCROLL);
+						break;
+				}
+				
 				//update x-coordinate
 				key.setX(key.getX() - getScrollX());
 				
