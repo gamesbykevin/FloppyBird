@@ -8,6 +8,7 @@ import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.background.Background;
 import com.gamesbykevin.floppybird.common.ICommon;
 import com.gamesbykevin.floppybird.entity.Entity;
+import com.gamesbykevin.floppybird.game.Game;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 
 import android.graphics.Canvas;
@@ -68,11 +69,17 @@ public final class Pipes extends Entity implements ICommon
 	 */
 	private static final int[] PIPE_BOTTOM_Y_POINTS = new int[] {-240,-240,-232,-215,-206,240,240,-206,-215,-232};
 	
+	//game reference object
+	private final Game game;
+	
 	/**
 	 * This class will control the pipes in the game
 	 */
-	public Pipes()
+	public Pipes(final Game game)
 	{
+		//store game reference
+		this.game = game;
+		
 		//add the pipe on the bottom
 		super.getSpritesheet().add(Key.PipeBottom, new Animation(Images.getImage(Assets.ImageGameKey.pipe)));
 		
@@ -102,7 +109,20 @@ public final class Pipes extends Entity implements ICommon
 			{
 				//if not paused we can scroll
 				if (!pipe.pause)
+				{
+					//update the scrolling
 					pipe.x -= Background.DEFAULT_X_SCROLL;
+					
+					//if the pipe was previously ahead, but am not any longer we add a point
+					if (!pipe.cleared && pipe.x < game.getBird().getX())
+					{
+						//flag that we cleared the pipe
+						pipe.cleared = true;
+						
+						//increase score
+						game.getScoreboard().setCurrentScore(game.getScoreboard().getCurrentScore() + 1);
+					}
+				}
 			}
 		}
 		
@@ -211,6 +231,9 @@ public final class Pipes extends Entity implements ICommon
 					//flag pause false
 					pipe.pause = false;
 					
+					//flag that the bird did not clear the pipe
+					pipe.cleared = false;
+					
 					//assign the x-coordinate
 					pipe.x = x;
 					
@@ -306,6 +329,9 @@ public final class Pipes extends Entity implements ICommon
 		
 		//pause the pipe scroll
 		private boolean pause = true;
+		
+		//did the bird clear this pipe
+		private boolean cleared = false;
 		
 		private Pipe(final int x, final int yTop, final int yBottom)
 		{

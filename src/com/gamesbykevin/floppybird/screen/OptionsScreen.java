@@ -36,7 +36,7 @@ public class OptionsScreen implements Screen, Disposable
     //buttons to access each button in the list
     public enum Key
     {
-    	Back, Sound, Vibrate, Instructions, Facebook, Twitter
+    	Back, Sound, Vibrate, Difficulty, Instructions, Facebook, Twitter
     }
     
     public OptionsScreen(final ScreenManager screen)
@@ -60,6 +60,10 @@ public class OptionsScreen implements Screen, Disposable
         //add vibrate option
         x += ScreenManager.BUTTON_X_INCREMENT;
         addButtonVibrate(x, y);
+        
+        //add difficulty button
+        x += ScreenManager.BUTTON_X_INCREMENT;
+        addButtonDifficulty(x, y);
         
         //the back button
         x += ScreenManager.BUTTON_X_INCREMENT;
@@ -151,6 +155,17 @@ public class OptionsScreen implements Screen, Disposable
         this.buttons.put(Key.Sound, button);
     }
 
+    private void addButtonDifficulty(final int x, final int y)
+    {
+        Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
+        button.addDescription("Difficulty: Normal");
+        button.addDescription("Difficulty: Hard");
+        button.addDescription("Difficulty: Easy");
+        button.setX(x);
+        button.setY(y);
+    	this.buttons.put(Key.Difficulty, button);
+    }
+    
     private void addButtonVibrate(final int x, final int y)
     {
         Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
@@ -201,6 +216,7 @@ public class OptionsScreen implements Screen, Disposable
 						case Back:
 						case Sound:
 						case Vibrate:
+						case Difficulty:
 							button.positionText(getScreen().getPaint());
 							break;
 							
@@ -264,6 +280,8 @@ public class OptionsScreen implements Screen, Disposable
     	                return false;
     	                
     				case Vibrate:
+    				case Difficulty:
+    					
     					//change index
     					button.setIndex(button.getIndex() + 1);
     					
@@ -360,6 +378,7 @@ public class OptionsScreen implements Screen, Disposable
 	    			case Back:
 	    			case Sound:
 	    			case Vibrate:
+	    			case Difficulty:
 	    				buttons.get(key).render(canvas, getScreen().getPaint());
 	    				break;
 	    				

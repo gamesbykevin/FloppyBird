@@ -63,6 +63,7 @@ public class Assets
      */
     public enum FontGameKey
     {
+    	ScoreFont
     	//Default
     }
     

@@ -70,7 +70,7 @@ public final class Game implements IGame
         this.bird = new Bird();
         
         //create our pipes container
-        this.pipes = new Pipes();
+        this.pipes = new Pipes(this);
     }
     
     /**
@@ -122,7 +122,7 @@ public final class Game implements IGame
      * Get the score board
      * @return The object containing the personal best records
      */
-    private Score getScoreboard()
+    public Score getScoreboard()
     {
     	return this.scoreboard;
     }
@@ -146,6 +146,9 @@ public final class Game implements IGame
         	
         	if (getPipes() != null)
         		getPipes().reset();
+        	
+        	//reset current score
+        	getScoreboard().setCurrentScore(0);
         	
     		//reset depending on the game mode
         	/**
@@ -343,10 +346,17 @@ public final class Game implements IGame
     	}
     	else
     	{
+    		//render pipes
         	if (getPipes() != null)
         		getPipes().render(canvas);
+        	
+        	//render bird
     		if (getBird() != null)
     			getBird().render(canvas);
+    		
+    		//render current score
+    		if (getScoreboard() != null)
+    			getScoreboard().render(canvas);
     	}
     }
     
