@@ -39,6 +39,9 @@ public class OptionsScreen implements Screen, Disposable
     	Back, Sound, Vibrate, Difficulty, Instructions, Facebook, Twitter
     }
     
+    //the user selection
+    private Key selection = null;
+    
     public OptionsScreen(final ScreenManager screen)
     {
         //our logo reference
@@ -158,9 +161,9 @@ public class OptionsScreen implements Screen, Disposable
     private void addButtonDifficulty(final int x, final int y)
     {
         Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
-        button.addDescription("Difficulty: Normal");
-        button.addDescription("Difficulty: Hard");
-        button.addDescription("Difficulty: Easy");
+        button.addDescription("Skill: Normal");
+        button.addDescription("Skill: Hard");
+        button.addDescription("Skill: Easy");
         button.setX(x);
         button.setY(y);
     	this.buttons.put(Key.Difficulty, button);
@@ -197,11 +200,32 @@ public class OptionsScreen implements Screen, Disposable
     }
     
     /**
+     * Get the menu selection
+     * @return The unique key of the button the user pressed
+     */
+    private Key getSelection()
+    {
+    	return this.selection;
+    }
+    
+    /**
+     * Set the menu selection
+     * @param selection The unique key of the button the user pressed
+     */
+    private void setSelection(final Key selection)
+    {
+    	this.selection = selection;
+    }
+    
+    /**
      * Reset any necessary screen elements here
      */
     @Override
     public void reset()
     {
+        //remove the selection
+        setSelection(null);
+    	
         if (buttons != null)
         {
         	for (Key key : Key.values())
@@ -245,6 +269,10 @@ public class OptionsScreen implements Screen, Disposable
     	if (action != MotionEvent.ACTION_UP)
     		return true;
     	
+    	//if there is a selection, no need to continue
+    	if (getSelection() != null)
+    		return true;
+    	
         if (buttons != null)
         {
         	for (Key key : Key.values())
@@ -260,93 +288,11 @@ public class OptionsScreen implements Screen, Disposable
     			if (!button.contains(x, y))
     				continue;
 				
-				//determine which button
-				switch (key)
-				{
-    				case Back:
-    					//change index
-    					button.setIndex(button.getIndex() + 1);
-    					
-    	                //store our settings
-    	                settings.save();
-    	                
-    	                //set ready state
-    	                getScreen().setState(ScreenManager.State.Ready);
-    	                
-    	                //play sound effect
-    	                Audio.play(Assets.AudioMenuKey.Selection);
-    	                
-    	                //no need to continue
-    	                return false;
-    	                
-    				case Vibrate:
-    				case Difficulty:
-    					
-    					//change index
-    					button.setIndex(button.getIndex() + 1);
-    					
-    					//position the text
-    			        button.positionText(getScreen().getPaint());
-    					
-    	                //play sound effect
-    	                Audio.play(Assets.AudioMenuKey.Selection);
-    	                
-                        //no need to continue
-                        return false;
-                        
-    				case Sound:
-    	    			
-    					//change index
-    					button.setIndex(button.getIndex() + 1);
-    					
-    					//position the text
-    			        button.positionText(getScreen().getPaint());
-    			        
-                        //flip setting
-                        Audio.setAudioEnabled(!Audio.isAudioEnabled());
-                        
-                        //play sound effect
-                        Audio.play(Assets.AudioMenuKey.Selection);
-                        
-                        //exit loop
-                        return false;
-                        
-    				case Instructions:
-    					
-    	                //play sound effect
-    	                Audio.play(Assets.AudioMenuKey.Selection);
-    	                
-    	                //go to instructions
-    					getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_GAME_INSTRUCTIONS_URL);
-    	                
-    	                //we do not request any additional events
-    	                return false;
-    					
-    				case Facebook:
-    					
-    	                //play sound effect
-    	                Audio.play(Assets.AudioMenuKey.Selection);
-    	                
-    	                //go to instructions
-    					getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_FACEBOOK_URL);
-    	                
-    	                //we do not request any additional events
-    	                return false;
-    					
-    				case Twitter:
-    					
-    	                //play sound effect
-    	                Audio.play(Assets.AudioMenuKey.Selection);
-    	                
-    	                //go to instructions
-    					getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_TWITTER_URL);
-    	                
-    	                //we do not request any additional events
-    	                return false;
-    				
-    				default:
-                    	throw new Exception("Key not setup here: " + key);
-				}
+    			//store the button selection
+    			setSelection(key);
+    			
+    			//no need to continue
+    			return false;
         	}
         }
     	
@@ -357,6 +303,103 @@ public class OptionsScreen implements Screen, Disposable
     @Override
     public void update() throws Exception
     {
+    	//handle selections here
+    	if (getSelection() != null)
+    	{
+    		//get the button selection
+    		Button button = buttons.get(selection);
+    		
+    		switch (getSelection())
+    		{
+				case Back:
+					//change index
+					button.setIndex(button.getIndex() + 1);
+					
+	                //store our settings
+	                settings.save();
+	                
+	                //set ready state
+	                getScreen().setState(ScreenManager.State.Ready);
+	                
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //end of case
+	                break;
+	                
+				case Vibrate:
+				case Difficulty:
+					
+					//change index
+					button.setIndex(button.getIndex() + 1);
+					
+					//position the text
+			        button.positionText(getScreen().getPaint());
+					
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //end of case
+	                break;
+	                
+				case Sound:
+	    			
+					//change index
+					button.setIndex(button.getIndex() + 1);
+					
+					//position the text
+			        button.positionText(getScreen().getPaint());
+			        
+	                //flip setting
+	                Audio.setAudioEnabled(!Audio.isAudioEnabled());
+	                
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //end of case
+	                break;
+	                
+				case Instructions:
+					
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //go to instructions
+					getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_GAME_INSTRUCTIONS_URL);
+	                
+	                //end of case
+	                break;
+					
+				case Facebook:
+					
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //go to instructions
+					getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_FACEBOOK_URL);
+	                
+	                //end of case
+	                break;
+					
+				case Twitter:
+					
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //go to instructions
+					getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_TWITTER_URL);
+	                
+	                //end of case
+	                break;
+				
+				default:
+	            	throw new Exception("Key not setup here: " + selection);
+    		}
+    		
+    		//remove selection
+    		setSelection(null);
+    	}
+    	
     	//if the game object exists, update it
     	if (getScreen().getScreenGame().getGame() != null)
     		getScreen().getScreenGame().getGame().update();

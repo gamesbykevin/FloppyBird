@@ -149,10 +149,15 @@ public final class ScreenManager implements Screen, Disposable
     {
     	//update current screen
         getScreen(getState()).update();
-        
-        //only update the scrolling when playing the game
-        if (getState() == State.Running)
-        	this.background.update();
+    }
+    
+    /**
+     * Get the background object
+     * @return The background object
+     */
+    public Background getBackground()
+    {
+    	return this.background;
     }
     
     /**
@@ -224,6 +229,9 @@ public final class ScreenManager implements Screen, Disposable
 	        	//if we are on the menu for the first time or coming from any state besides the options
 	        	if (getState() == null || getState() != State.Options)
 	        	{
+	        		if (getScreenGame() != null && getScreenGame().getGame() != null)
+	        			getScreenGame().getGame().getPipes().resetTime();
+	        		
 	        		//stop all sound
 	        		Audio.stop();
 	        		
@@ -255,7 +263,7 @@ public final class ScreenManager implements Screen, Disposable
             canvas.drawColor(Color.BLACK);
             
             //draw the background
-            background.render(canvas);
+            getBackground().render(canvas);
             
             //render the game
             getScreenGame().render(canvas);

@@ -16,17 +16,40 @@ import android.graphics.Canvas;
 public final class Pipes extends Entity implements ICommon 
 {
 	/**
+	 * The width of the pipe(s)
+	 */
+	public static final int PIPE_WIDTH = 89;
+	
+	/**
+	 * The height of the pipe(s)
+	 */
+	public static final int PIPE_HEIGHT = 480;
+	
+	/**
 	 * The time delay until we add a pipe
 	 */
-	public static final long PIPE_DELAY = 1750L;
+	public static final long PIPE_DELAY = 1300L;
 	
 	//keep track of the time
 	private long time;
 	
 	/**
-	 * The y-pixel difference between pipes
+	 * The y-pixel difference between pipes for normal difficulty
 	 */
-	private static final int PIPE_GAP = 115;
+	public static final int PIPE_GAP_NORMAL = 120;
+	
+	/**
+	 * The y-pixel difference between pipes for hard difficulty
+	 */
+	public static final int PIPE_GAP_HARD = 100;
+	
+	/**
+	 * The y-pixel difference between pipes for easy difficulty
+	 */
+	public static final int PIPE_GAP_EASY = 150;
+	
+	//the pipe gap setting chosen
+	private int pipeGap = PIPE_GAP_NORMAL;
 	
 	/**
 	 * The minimum pixels that need to show for the pipe
@@ -45,9 +68,10 @@ public final class Pipes extends Entity implements ICommon
 	private ArrayList<Pipe> pipes;
 	
 	/**
-	 * The number of pipes allowed in the array list
+	 * The number of pipes allowed in the array list.<br>
+	 * This will be determined by the width of the screen as well as the width of a single pipe
 	 */
-	private static final int PIPE_MAX = 5;
+	private static final int PIPE_MAX = (GamePanel.WIDTH / PIPE_WIDTH);
 	
 	/**
 	 * Array of x-coordinates that make up the top pipe, used for collision detection
@@ -96,6 +120,10 @@ public final class Pipes extends Entity implements ICommon
 	@Override
 	public void update() throws Exception 
 	{
+		//don't continue if the bird is dead or if the bird has not started
+		if (game.getBird().isDead() || !game.getBird().hasStart())
+			return;
+		
 		//update the pipes in our list
 		for (Pipe pipe : getPipes())
 		{
@@ -138,6 +166,16 @@ public final class Pipes extends Entity implements ICommon
 			//spawn a pipe
 			spawnPipe();
 		}
+		
+		//check for collision
+		if (hasCollision(game.getBird()))
+		{
+			//flag game over
+			game.setGameover(true);
+			
+			//flag bird dead
+			game.getBird().setDead(true);
+		}
 	}
 
 	/**
@@ -171,26 +209,35 @@ public final class Pipes extends Entity implements ICommon
 			//make sure the entity's outline is updated before checking collision
 			entity.updateOutline();
 			
-			//set the location of the top pipe
-			super.setX(pipe.x);
-			super.setY(pipe.yTop);
+			//only check collision with the top pipe if in range
+			if (entity.getY() <= pipe.yTop + getHeight())
+			{
+				//set the location of the top pipe
+				super.setX(pipe.x);
+				super.setY(pipe.yTop);
+				
+				//update the outline
+				updateOutline(PIPE_TOP_X_POINTS, PIPE_TOP_Y_POINTS);
+				
+				//if we have collision return true
+				if (super.hasCollision(entity))
+					return true;
+			}
 			
-			//update the outline
-			updateOutline(PIPE_TOP_X_POINTS, PIPE_TOP_Y_POINTS);
-			
-			//if we have collision return true
-			if (super.hasCollision(entity))
-				return true;
-			
-			//set the location of the bottom pipe
-			super.setY(pipe.yBottom);
-			
-			//update the outline
-			updateOutline(PIPE_BOTTOM_X_POINTS, PIPE_BOTTOM_Y_POINTS);
-			
-			//if we have collision return true
-			if (super.hasCollision(entity))
-				return true;
+			//only check collision with the bottom pipe if in range
+			if (entity.getY() + entity.getHeight() >= pipe.yBottom)
+			{
+				//set the location of the bottom pipe
+				super.setX(pipe.x);
+				super.setY(pipe.yBottom);
+				
+				//update the outline
+				updateOutline(PIPE_BOTTOM_X_POINTS, PIPE_BOTTOM_Y_POINTS);
+				
+				//if we have collision return true
+				if (super.hasCollision(entity))
+					return true;
+			}
 		}
 		
 		//no collision was found
@@ -209,13 +256,13 @@ public final class Pipes extends Entity implements ICommon
 		final int minimumY = (int)(PIPE_DISPLAY_MIN - getHeight());
 		
 		//calculate the range
-		final int range = (int)((GamePanel.HEIGHT - PIPE_DISPLAY_MIN - PIPE_GAP - Background.GROUND_HEIGHT - getHeight()) - minimumY);
+		final int range = (int)((GamePanel.HEIGHT - PIPE_DISPLAY_MIN - getPipeGap() - Background.GROUND_HEIGHT - getHeight()) - minimumY);
 		
 		//pick the random starting location
 		final int yTop = minimumY + (GamePanel.RANDOM.nextInt(range));
 		
 		//calculate the bottom pipe starting location
-		final int yBottom = (int)(yTop + getHeight() + PIPE_GAP);
+		final int yBottom = (int)(yTop + getHeight() + getPipeGap());
 		
 		/**
 		 * If the size of the list exceeds the max lets see if we can reuse a pipe
@@ -225,7 +272,7 @@ public final class Pipes extends Entity implements ICommon
 			//check the list
 			for (Pipe pipe : getPipes())
 			{
-				//if this pipe is paused, it is a candidate
+				//if this pipe is paused, this will be our candidate
 				if (pipe.pause)
 				{
 					//flag pause false
@@ -242,6 +289,9 @@ public final class Pipes extends Entity implements ICommon
 					
 					//assign the y-coordinate bottom
 					pipe.yBottom = yBottom;
+					
+					//exit the loop
+					break;
 				}
 			}
 		}
@@ -258,20 +308,39 @@ public final class Pipes extends Entity implements ICommon
 		}
 	}
 	
+	/**
+	 * Assign the pipe gap
+	 * @param pipeGap The y-pixel distance between the top and bottom pipes
+	 */
+	public void setPipeGap(final int pipeGap)
+	{
+		this.pipeGap = pipeGap;
+	}
+	
+	/**
+	 * Get the pipe gap
+	 * @return The y-pixel distance between the top and bottom pipes
+	 */
+	private int getPipeGap()
+	{
+		return this.pipeGap;
+	}
+	
 	@Override
 	public void reset()
 	{
 		//set a default animation
 		super.getSpritesheet().setKey(Key.PipeTop);
 		
-		//assign the dimensions
-		super.setWidth(getSpritesheet().get().getImage().getWidth());
+		//assign the dimensions once, since both pipes will have the same dimensions
+		super.setWidth(PIPE_WIDTH);
+		super.setHeight(PIPE_HEIGHT);
 		
-		//assign the dimensions
-		super.setHeight(getSpritesheet().get().getImage().getHeight());
-		
-		//clear list of existing pipes
-		getPipes().clear();
+		//make all pipes paused so they can be spawned
+		for (Pipe pipe : getPipes())
+		{
+			pipe.pause = true;
+		}
 		
 		//assign the current time
 		resetTime();

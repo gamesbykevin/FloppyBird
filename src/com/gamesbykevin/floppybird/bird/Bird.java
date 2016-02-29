@@ -3,8 +3,10 @@ package com.gamesbykevin.floppybird.bird;
 import com.gamesbykevin.androidframework.anim.Animation;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
+import com.gamesbykevin.floppybird.background.Background;
 import com.gamesbykevin.floppybird.common.ICommon;
 import com.gamesbykevin.floppybird.entity.Entity;
+import com.gamesbykevin.floppybird.game.Game;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 
 import android.graphics.Canvas;
@@ -39,6 +41,9 @@ public class Bird extends Entity implements ICommon
 	//did the game start
 	private boolean start = false;
 	
+	//is the bird dead
+	private boolean dead = false;
+	
 	/**
 	 * Array of x-coordinates that make up the bird, used for collision detection
 	 */
@@ -49,11 +54,17 @@ public class Bird extends Entity implements ICommon
 	 */
 	private static final int[] BIRD_Y_POINTS = new int[] {-4, -15, -17, -12, -5, 3, 10, 10, 14, 19, 10, 5};
 	
+	//game reference object
+	private final Game game;
+	
 	/**
 	 * Default constructor to create a new bird
 	 */
-	public Bird()
+	public Bird(final Game game)
 	{
+		//store our game reference object
+		this.game = game;
+		
 		//add these animations
 		addAnimation(Assets.ImageGameKey.bird1, 75, 52);
 		addAnimation(Assets.ImageGameKey.bird2, 75, 52);
@@ -64,6 +75,24 @@ public class Bird extends Entity implements ICommon
 		reset();
 		
 		super.updateOutline(BIRD_X_POINTS, BIRD_Y_POINTS);
+	}
+	
+	/**
+	 * Flag the bird dead
+	 * @param dead true = yes, false = no
+	 */
+	public final void setDead(final boolean dead)
+	{
+		this.dead = dead;
+	}
+	
+	/**
+	 * Is the bird dead?
+	 * @return true = yes, false = no
+	 */
+	public final boolean isDead()
+	{
+		return this.dead;
 	}
 	
 	/**
@@ -114,7 +143,11 @@ public class Bird extends Entity implements ICommon
 	 */
 	public final void reset()
 	{
+		//the bird did not start
 		setStart(false);
+		
+		//the bird is not dead
+		setDead(false);
 		
 		//reset location
 		setX(START_X);
@@ -162,6 +195,10 @@ public class Bird extends Entity implements ICommon
 	 */
 	public final void jump()
 	{
+		//if the bird is dead we can't jump
+		if (isDead())
+			return;
+		
 		//flag start true
 		setStart(true);
 		
@@ -202,6 +239,20 @@ public class Bird extends Entity implements ICommon
 		
 		//update the animation
 		getSpritesheet().update();
+		
+		//make sure the bird didn't hit the ground
+		if (getY() + getHeight() > GamePanel.HEIGHT - Background.GROUND_HEIGHT)
+		{
+			//position bird right above the ground
+			setY(GamePanel.HEIGHT - Background.GROUND_HEIGHT - getHeight());
+			
+			//flag game over true
+			if (!isDead())
+				game.setGameover(true);
+			
+			//flag the bird as dead
+			setDead(true);
+		}
 	}
 	
 	/**

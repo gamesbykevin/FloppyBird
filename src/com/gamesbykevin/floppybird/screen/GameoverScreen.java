@@ -71,6 +71,13 @@ public class GameoverScreen implements Screen, Disposable
     	Restart, Menu, Rate
     }
     
+    //the menu selection made
+    private Key selection = null;
+    
+    /**
+     * Create the game over screen
+     * @param screen Parent screen manager object
+     */
     public GameoverScreen(final ScreenManager screen)
     {
         //store our parent reference
@@ -139,6 +146,9 @@ public class GameoverScreen implements Screen, Disposable
         {
         	button.positionText(screen.getPaint());
         }
+        
+        //remove the selection
+        setSelection(null);
     }
     
     /**
@@ -189,12 +199,34 @@ public class GameoverScreen implements Screen, Disposable
     	return this.display;
     }
     
+    /**
+     * Get the menu selection
+     * @return The unique key of the button the user pressed
+     */
+    private Key getSelection()
+    {
+    	return this.selection;
+    }
+    
+    /**
+     * Set the menu selection
+     * @param selection The unique key of the button the user pressed
+     */
+    private void setSelection(final Key selection)
+    {
+    	this.selection = selection;
+    }
+    
     @Override
     public boolean update(final int action, final float x, final float y) throws Exception
     {
         //if we aren't displaying the menu, return false
         if (!hasDisplay())
             return false;
+        
+        //don't continue if we already made a selection
+        if (getSelection() != null)
+        	return false;
         
         if (action == MotionEvent.ACTION_UP)
         {
@@ -207,51 +239,11 @@ public class GameoverScreen implements Screen, Disposable
         		if (!button.contains(x, y))
         			continue;
         		
-                //remove messages
-                setMessage("");
-                
-        		//handle each button different
-        		switch (key)
-        		{
-        			case Restart:
-        			
-	                    //reset with the same settings
-	                    screen.getScreenGame().getGame().setReset(true);
-	                    
-	                    //move back to the game
-	                    screen.setState(ScreenManager.State.Running);
-	                    
-	                    //play sound effect
-	                    Audio.play(Assets.AudioMenuKey.Selection);
-	                    
-	                    //we don't request additional motion events
-	                    return false;
-
-	        		case Menu:
-	                    
-	                    //move to the main menu
-	                    screen.setState(ScreenManager.State.Ready);
-	                    
-	                    //play sound effect
-	                    Audio.play(Assets.AudioMenuKey.Selection);
-	                    
-	                    //we don't request additional motion events
-	                    return false;
-	        			
-	        		case Rate:
-	                    
-	                    //play sound effect
-	                    Audio.play(Assets.AudioMenuKey.Selection);
-	                    
-	                    //go to rate game page
-	                    screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_RATE_URL);
-	                    
-	                    //we don't request additional motion events
-	                    return false;
-	        			
-        			default:
-        				throw new Exception("Key not setup here: " + key);
-        		}
+        		//assign the user selection
+        		setSelection(key);
+        		
+                //no more events required
+                return false;
         	}
         }
         
@@ -262,21 +254,75 @@ public class GameoverScreen implements Screen, Disposable
     @Override
     public void update() throws Exception
     {
-    	//we still want to update the game to continue showing the balls in motion
-    	this.screen.getScreenGame().update();
-    	
-        //if not displaying the menu, track timer
-        if (!hasDisplay())
-        {
-            //if time has passed display menu
-            if (System.currentTimeMillis() - time >= DELAY_MENU_DISPLAY)
-            {
-            	//display the menu
-            	setDisplay(true);
-
-                //anything else to do here
-            }
-        }
+    	if (getSelection() != null)
+    	{
+			//handle each button different
+			switch (getSelection())
+			{
+				case Restart:
+				
+	                //reset with the same settings
+	                screen.getScreenGame().getGame().setReset(true);
+	                
+	                //move back to the game
+	                screen.setState(ScreenManager.State.Running);
+	                
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //end of case
+	                break;
+	
+	    		case Menu:
+	                
+	                //move to the main menu
+	                screen.setState(ScreenManager.State.Ready);
+	                
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //end of case
+	                break;
+	    			
+	    		case Rate:
+	                
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //go to rate game page
+	                screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_RATE_URL);
+	                
+	                //end of case
+	                break;
+	    			
+				default:
+					throw new Exception("Key not setup here: " + getSelection());
+			}
+			
+			//remove selection
+			setSelection(null);
+			
+            //remove messages
+            setMessage("");
+    	}
+    	else
+    	{
+	    	//we still want to update the game to continue showing the balls in motion
+	    	this.screen.getScreenGame().update();
+	    	
+	        //if not displaying the menu, track timer
+	        if (!hasDisplay())
+	        {
+	            //if time has passed display menu
+	            if (System.currentTimeMillis() - time >= DELAY_MENU_DISPLAY)
+	            {
+	            	//display the menu
+	            	setDisplay(true);
+	
+	                //anything else to do here?
+	            }
+	        }
+    	}
     }
     
     @Override

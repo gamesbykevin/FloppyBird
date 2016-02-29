@@ -19,7 +19,7 @@ public class MainThread extends Thread
     /**
      * The default time to sleep when paused
      */
-    private static final long DEFAULT_PAUSE_SLEEP = 250L;
+    private static final long DEFAULT_PAUSE_SLEEP = 333L;
     
     //the assigned frames per second for this game
     public static final int FPS = 30;
@@ -31,7 +31,7 @@ public class MainThread extends Thread
     private final SurfaceHolder holder;
     
     //is the thread running
-    private boolean running;
+    private boolean running = false;
     
     //our canvas to render image(s)
     private Canvas canvas;
@@ -60,6 +60,12 @@ public class MainThread extends Thread
     @Override
     public void run()
     {
+    	//flag running true
+    	setRunning(true);
+    	
+    	//do not pause the thread
+    	setPause(false);
+    	
         //track total time elapsed to calculate fps
         long totalTime = 0;
         
@@ -92,17 +98,17 @@ public class MainThread extends Thread
 
                 try 
                 {
+                    //update our game panel
+                    getPanel().update();
+                    
                     //attempt to lock the canvas to edit the pixels of the surface
                 	setCanvas(getHolder().lockCanvas());
 
                     //make sure no other threads are accessing the holder
                     synchronized (getHolder())
                     {
-                        //update our game panel
-                        getPanel().update();
-
-                        //if the canvas object was obtained and we did not pause, render
-                        if (getCanvas() != null && !isPaused())
+                        //if the canvas object was obtained, render
+                        if (getCanvas() != null)
                             getPanel().draw(getCanvas());
                     }
                 }
@@ -112,19 +118,8 @@ public class MainThread extends Thread
                 }
                 finally 
                 {
-                    //remove the lock (if possible)
-                    if (getCanvas() != null)
-                    {
-                        try
-                        {
-                            //render the pixels on the canvas to the screen
-                        	getHolder().unlockCanvasAndPost(getCanvas());
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }
+                	//unlock the canvas
+                	unlockCanvas();
                 }
 
                 //calculate the number of milliseconds elapsed
@@ -186,7 +181,27 @@ public class MainThread extends Thread
         finally 
         {
 	        //stop thread
-	        this.setRunning(false);
+	        setRunning(false);
+        }
+    }
+    
+    /**
+     * Here we check if the canvas has a lock, and if so release it
+     */
+    private void unlockCanvas()
+    {
+        //remove the lock (if possible)
+        if (getCanvas() != null)
+        {
+            try
+            {
+        		//render the pixels on the canvas to the screen
+        		getHolder().unlockCanvasAndPost(getCanvas());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
     }
     

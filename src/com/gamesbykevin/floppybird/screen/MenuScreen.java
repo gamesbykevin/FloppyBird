@@ -60,6 +60,9 @@ public class MenuScreen implements Screen, Disposable
         Start, Exit, Settings, Instructions, More, Rate, Twitter, Facebook
     }
     
+    //the user selection from the menu
+    private Key selection = null;
+    
     //start new game, and did we notify user
     private boolean reset = false, notify = false;
     
@@ -98,6 +101,10 @@ public class MenuScreen implements Screen, Disposable
      */
     public static final int ICON_Y = GamePanel.HEIGHT - (int)(MenuScreen.ICON_DIMENSION * 1.25);
     
+    /**
+     * Create the menu screen
+     * @param screen The parent screen object reference
+     */
     public MenuScreen(final ScreenManager screen)
     {
         //store reference to the logo
@@ -206,7 +213,26 @@ public class MenuScreen implements Screen, Disposable
     @Override
     public void reset()
     {
-        //do we need anything here
+        //remove the selection
+        setSelection(null);
+    }
+    
+    /**
+     * Get the menu selection
+     * @return The unique key of the button the user pressed
+     */
+    private Key getSelection()
+    {
+    	return this.selection;
+    }
+    
+    /**
+     * Set the menu selection
+     * @param selection The unique key of the button the user pressed
+     */
+    private void setSelection(final Key selection)
+    {
+    	this.selection = selection;
     }
     
     @Override
@@ -216,6 +242,10 @@ public class MenuScreen implements Screen, Disposable
         if (reset)
             return false;
         
+    	//don't continue if we already made a selection
+    	if (getSelection() != null)
+    		return false;
+    	
         if (action == MotionEvent.ACTION_UP)
         {
         	//check every button
@@ -227,95 +257,25 @@ public class MenuScreen implements Screen, Disposable
         		//if the coordinates are contained in the button
         		if (button.contains(x, y))
         		{
-        			//do something different depending on the key
         			switch (key)
         			{
-		        		case Instructions:
-		                    //play sound effect
-		                    Audio.play(Assets.AudioMenuKey.Selection);
-		                    
-		                    //go to instructions
-		                    this.screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_GAME_INSTRUCTIONS_URL);
-		                    
-		                    //we do not request any additional events
-		                    return false;
-		                    
-		        		case Facebook:
-		                    //play sound effect
-		                    Audio.play(Assets.AudioMenuKey.Selection);
-		                    
-		                    //go to instructions
-		                    this.screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_FACEBOOK_URL);
-		                    
-		                    //we do not request any additional events
-		                    return false;
-		                    
-		        		case Twitter:
-		                    //play sound effect
-		                    Audio.play(Assets.AudioMenuKey.Selection);
-		                    
-		                    //go to instructions
-		                    this.screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_TWITTER_URL);
-		                    
-		                    //we do not request any additional events
-		                    return false;
-		        			
-		        		case Start:
-		                    //flag reset
-		                    reset = true;
-		                    
-		                    //flag notify false
-		                    notify = false;
-		                    
-		                    //play sound effect
-		                    Audio.play(Assets.AudioMenuKey.Selection);
-		                    
-		                    //we do not request any additional events
-		                    return false;
-		                    
+        				//exit game here instead of update(), to avoid infinite loop
 	        			case Exit:
-	                        //play sound effect
-	                        Audio.play(Assets.AudioMenuKey.Selection);
-	                        
-	                        //exit game
-	                        this.screen.getPanel().getActivity().finish();
-	                        
-	                        //we do not request any additional events
-	                        return false;
-	                        
-	        			case Settings: 
-	                        //set the state
-	                        screen.setState(ScreenManager.State.Options);
-	                        
-	                        //play sound effect
-	                        Audio.play(Assets.AudioMenuKey.Selection);
-	                        
-	                        //we do not request any additional events
-	                        return false;
-	                        
-	    				case More: 
-	    	                //play sound effect
-	    	                Audio.play(Assets.AudioMenuKey.Selection);
-	    	                
-	    	                //go to web page
-	    	                this.screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_MORE_GAMES_URL);
-	    	                
-	    	                //we do not request any additional events
-	    	                return false;
-	    	                
-						case Rate:
-			                //play sound effect
-			                Audio.play(Assets.AudioMenuKey.Selection);
-			                
-			                //go to web page
-			                this.screen.getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_RATE_URL);
-			                
-			                //we do not request any additional events
-			                return false;
-			                
-		                default:
-		                	throw new Exception("Key not handled here: " + key);
+	        	            //play sound effect
+	        	            Audio.play(Assets.AudioMenuKey.Selection);
+	        	            
+	        	            //exit game
+	        	            getScreen().getPanel().getActivity().finish();
+	        	            break;
+                        
+	        			default:
+	        				//everything else we store the selection and change in update()
+	        				setSelection(key);
+	        				break;
         			}
+        			
+        			//we don't need to check any additional buttons/events
+        			return false;
         		}
         	}
         }
@@ -327,8 +287,96 @@ public class MenuScreen implements Screen, Disposable
     @Override
     public void update() throws Exception
     {
-    	//only reset if we notified the user by displaying the splash screen
-        if (reset && notify)
+    	//if we have a selection
+    	if (getSelection() != null)
+    	{
+			//do something different depending on the selection
+			switch (getSelection())
+			{
+        		case Instructions:
+                    //play sound effect
+                    Audio.play(Assets.AudioMenuKey.Selection);
+                    
+                    //go to instructions
+                    getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_GAME_INSTRUCTIONS_URL);
+                    
+                    //we do not need to continue
+	                break;
+                    
+        		case Facebook:
+                    //play sound effect
+                    Audio.play(Assets.AudioMenuKey.Selection);
+                    
+                    //go to instructions
+                    getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_FACEBOOK_URL);
+                    
+                    //we do not need to continue
+	                break;
+                    
+        		case Twitter:
+                    //play sound effect
+                    Audio.play(Assets.AudioMenuKey.Selection);
+                    
+                    //go to instructions
+                    getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_TWITTER_URL);
+                    
+                    //we do not need to continue
+	                break;
+        			
+        		case Start:
+                    //flag reset
+                    reset = true;
+                    
+                    //flag notify false
+                    notify = false;
+                    
+                    //play sound effect
+                    Audio.play(Assets.AudioMenuKey.Selection);
+                    
+                    //we do not need to continue
+	                break;
+                    
+    			case Settings: 
+                    //set the state
+    				getScreen().setState(ScreenManager.State.Options);
+                    
+                    //play sound effect
+                    Audio.play(Assets.AudioMenuKey.Selection);
+                    
+                    //we do not need to continue
+	                break;
+                    
+				case More: 
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //go to web page
+	                getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_MORE_GAMES_URL);
+	                
+                    //we do not need to continue
+	                break;
+	                
+				case Rate:
+	                //play sound effect
+	                Audio.play(Assets.AudioMenuKey.Selection);
+	                
+	                //go to web page
+	                getScreen().getPanel().getActivity().openWebpage(MainActivity.WEBPAGE_RATE_URL);
+	                
+                    //we do not need to continue
+	                break;
+	                
+                default:
+                	throw new Exception("Key not handled here: " + selection);
+			}
+    		
+			//remove our selection
+			setSelection(null);
+			
+			//no need to continue
+			return;
+    	}
+    	else if (reset && notify)
         {
             //load game assets
             Assets.load(getScreen().getPanel().getActivity());

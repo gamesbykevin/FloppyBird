@@ -67,7 +67,7 @@ public final class Game implements IGame
         this.scoreboard = new Score(screen.getScreenOptions(), screen.getPanel().getActivity());
         
         //create our bird
-        this.bird = new Bird();
+        this.bird = new Bird(this);
         
         //create our pipes container
         this.pipes = new Pipes(this);
@@ -113,9 +113,19 @@ public final class Game implements IGame
      * Flag the game over
      * @param gameover true = yes, false = no
      */
-    private void setGameover(final boolean gameover)
+    public void setGameover(final boolean gameover)
     {
     	this.gameover = gameover;
+    	
+    	//if the game is flagged as over 
+    	if (hasGameover())
+    	{
+    		//change the state
+    		getScreen().setState(State.GameOver);
+    		
+    		//set default text, for now
+    		getScreen().getScreenGameover().setMessage("Game Over");
+    	}
     }
     
     /**
@@ -150,13 +160,25 @@ public final class Game implements IGame
         	//reset current score
         	getScoreboard().setCurrentScore(0);
         	
-    		//reset depending on the game mode
-        	/**
-    		switch (getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Mode))
+    		//reset depending on the difficulty
+    		switch (getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Difficulty))
     		{
-    		
+	    		//Normal
+	    		case 0:
+    			default:
+    				getPipes().setPipeGap(Pipes.PIPE_GAP_NORMAL);
+	    			break;
+	    			
+	    		//Hard
+	    		case 1:
+	    			getPipes().setPipeGap(Pipes.PIPE_GAP_HARD);
+	    			break;
+	    			
+	    		//Easy
+	    		case 2:
+	    			getPipes().setPipeGap(Pipes.PIPE_GAP_EASY);
+	    			break;
     		}
-    		*/
     	}
     }
     
@@ -270,45 +292,15 @@ public final class Game implements IGame
         }
         else
         {
-			//if the game hasn't been flagged game over yet
-			if (!hasGameover())
-			{
-	        	//update the bird
-        		getBird().update();
-        		
-        		//make sure the bird has started before updating the pipes
-	        	if (getBird().hasStart())
-	        		getPipes().update();
-	        	
-    			//check if the bird hit any pipes
-    			if (getPipes().hasCollision(getBird()))
-    			{
-    				//flag game over true
-    				setGameover(true);
-    				
-            		//change the state
-            		getScreen().setState(State.GameOver);
-            		
-            		//set default text, for now
-            		getScreen().getScreenGameover().setMessage("Game Over");
-    			}
-    			
-        		//check if the bird hit the ground
-        		if (getBird().getY() + getBird().getHeight() >= GamePanel.HEIGHT - Background.GROUND_HEIGHT)
-        		{
-        			//position bird right above the ground
-        			getBird().setY(GamePanel.HEIGHT - Background.GROUND_HEIGHT - getBird().getHeight());
-        			
-    				//flag game over true
-    				setGameover(true);
-    				
-            		//change the state
-            		getScreen().setState(State.GameOver);
-
-            		//set default text, for now
-            		getScreen().getScreenGameover().setMessage("Game Over");
-        		}
-			}
+        	//update the bird
+    		getBird().update();
+    		
+    		//update the pipes
+    		getPipes().update();
+    		
+    		//the background should be scrolling if the bird is not dead
+        	if (!getBird().isDead())
+        		getScreen().getBackground().update();
         }
     }
     

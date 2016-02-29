@@ -105,6 +105,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Di
                 
                 if (getThread() != null)
                 {
+                	//don't pause the thread
+                	getThread().setPause(false);
+                	
                     //set running false, to stop the infinite loop
                 	getThread().setRunning(false);
 
@@ -235,9 +238,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Di
     {
         try
         {
-            //load assets
-            Assets.load(getActivity());
-            
             //create if null
             if (RANDOM == null)
                 RANDOM = new Random(System.nanoTime());
@@ -246,13 +246,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Di
             if (getThread() == null)
         		this.thread = new MainThread(getHolder(), this);
             
-            //if the thread hasn't been started yet
+            //if the thread isn't running, start it
             if (!getThread().isRunning())
-            {
-                //start the thread
-            	getThread().setRunning(true);
             	getThread().start();
-            }
             
             //flag the thread as not paused
             getThread().setPause(false);
@@ -288,7 +284,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Di
             Audio.stop();
             
             //flag the thread as paused
-            getThread().setPause(false);
+            getThread().setPause(true);
             
             //set the state
             getScreen().setState(State.Paused);
@@ -316,9 +312,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Di
             //make sure the screen is created first before the thread starts
             if (getScreen() == null)
             {
-                //load all assets
-                Assets.load(getActivity());
-
                 //create new screen manager
                 this.screen = new ScreenManager(this);
             }

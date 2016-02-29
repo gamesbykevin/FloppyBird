@@ -128,7 +128,28 @@ public class MainActivity extends Activity
     @Override
     public void onPause()
     {
+    	//call parent
         super.onPause();
+    }
+    
+    /**
+     * Part of the activity life cycle
+     */
+    @Override
+    public void onWindowFocusChanged(final boolean hasFocus)
+    {
+    	//call parent
+    	super.onWindowFocusChanged(true);
+    }
+    
+    /**
+     * Part of the activity life cycle
+     */
+    @Override
+    public void onResume()
+    {
+    	//call parent
+    	super.onResume();
     }
     
     /**
