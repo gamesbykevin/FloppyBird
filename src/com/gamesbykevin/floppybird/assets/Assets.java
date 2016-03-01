@@ -88,7 +88,7 @@ public class Assets
      */
     public enum ImageGameKey
     {
-    	bird1, bird2, bird3, bird4, pipe, pipe1, sheet
+    	bird1, bird2, bird3, bird4, numbers, pipe, pipe1, sheet
     }
     
     /**

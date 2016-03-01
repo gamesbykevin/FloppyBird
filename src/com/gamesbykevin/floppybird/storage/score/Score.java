@@ -3,9 +3,13 @@ package com.gamesbykevin.floppybird.storage.score;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gamesbykevin.androidframework.anim.Animation;
+import com.gamesbykevin.androidframework.base.Entity;
 import com.gamesbykevin.androidframework.io.storage.Internal;
 import com.gamesbykevin.androidframework.resources.Font;
+import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
+import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.screen.OptionsScreen;
 import com.gamesbykevin.floppybird.storage.settings.Settings;
 
@@ -30,6 +34,35 @@ public class Score extends Internal
 	//the paint object to render the current score
 	private Paint paint;
 	
+	//the entity to render the score
+	private Entity entity;
+	
+	//the dimensions of each number animation
+	private static final int NUMBER_WIDTH = 55;
+	private static final int NUMBER_HEIGHT = 78;
+	
+	private enum NumberKey
+	{
+		Zero(0), One(1), Two(2), Three(3), Four(4), 
+		Five(5), Six(6), Seven(7), Eight(8), Nine(9);
+		
+		
+		private int x, y = 0;
+		
+		private NumberKey(final int col)
+		{
+			x = col * NUMBER_WIDTH;
+		}
+	}
+	
+	//our array object for each digit in our score
+	private DigitScore[] digits;
+	
+	/**
+	 * The y-coordinate where the score is rendered
+	 */
+	private static final int SCORE_Y = 20;
+	
 	/**
 	 * Create new score object to track high score
 	 * @param screen Object to reference that has the modes we are tracking
@@ -38,6 +71,20 @@ public class Score extends Internal
 	public Score(final OptionsScreen screen, final Activity activity) 
 	{
 		super(FILE_NAME, activity);
+		
+		//create new entity and set the dimensions
+		this.entity = new Entity();
+		this.entity.setWidth(NUMBER_WIDTH);
+		this.entity.setHeight(NUMBER_HEIGHT);
+		
+		//add all number animations
+		for (NumberKey key : NumberKey.values())
+		{
+			this.entity.getSpritesheet().add(key, new Animation(Images.getImage(Assets.ImageGameKey.numbers), key.x, key.y, NUMBER_WIDTH, NUMBER_HEIGHT));
+		}
+		
+		//set default animation
+		this.entity.getSpritesheet().setKey(NumberKey.Zero);
 		
 		//create font for the score render
 		this.paint = new Paint();
@@ -100,7 +147,90 @@ public class Score extends Internal
 	 */
 	public void setCurrentScore(final int currentScore)
 	{
+		//assign the score
 		this.currentScore = currentScore;
+		
+    	//get the score and convert to string
+    	String tmpScore = String.valueOf(currentScore);
+    	
+		//update the digits
+    	if (this.digits == null || this.digits != null && this.digits.length != tmpScore.length())
+    		this.digits = new DigitScore[tmpScore.length()];
+		
+		//calculate the starting point
+    	int x = (GamePanel.WIDTH / 2) - ((tmpScore.length() * NUMBER_WIDTH) / 2);
+    	
+    	//index
+    	int index = 0;
+    	
+    	//assign the animations for each character
+    	for (char test : tmpScore.toCharArray())
+    	{
+    		//store the number key
+    		NumberKey tmp = null;
+    		
+    		//identify which animation
+    		switch (test)
+    		{
+	    		case '0':
+    			default:
+    				tmp = NumberKey.Zero;
+	    			break;
+	    			
+	    		case '1':
+	    			tmp = NumberKey.One;
+	    			break;
+	    			
+	    		case '2':
+	    			tmp = NumberKey.Two;
+	    			break;
+	    			
+	    		case '3':
+	    			tmp = NumberKey.Three;
+	    			break;
+	    			
+	    		case '4':
+	    			tmp = NumberKey.Four;
+	    			break;
+	    			
+	    		case '5':
+	    			tmp = NumberKey.Five;
+	    			break;
+	    			
+	    		case '6':
+	    			tmp = NumberKey.Six;
+	    			break;
+	    			
+	    		case '7':
+	    			tmp = NumberKey.Seven;
+	    			break;
+	    			
+	    		case '8':
+	    			tmp = NumberKey.Eight;
+	    			break;
+	    			
+	    		case '9':
+	    			tmp = NumberKey.Nine;
+	    			break;
+    		}
+    		
+    		if (this.digits[index] == null)
+    		{
+    			this.digits[index] = new DigitScore(x, tmp);
+    		}
+    		else
+    		{
+    			//update
+    			this.digits[index].x = x;
+    			this.digits[index].key = tmp;
+    		}
+    		
+    		//change index
+    		index++;
+    		
+    		//adjust x-coordinate
+    		x += NUMBER_WIDTH;
+    	}
 	}
 	
 	/**
@@ -221,10 +351,35 @@ public class Score extends Internal
      * Render the current score
      * @param canvas
      */
-    public void render(final Canvas canvas)
+    public void render(final Canvas canvas) throws Exception
     {
-    	//render the current score
-    	canvas.drawText(this.getCurrentScore() + "", 380, 240, this.paint);
+    	for (DigitScore digit : digits)
+    	{
+    		//assign location
+    		entity.setX(digit.x);
+    		entity.setY(SCORE_Y);
+    		
+    		//assign animation
+    		entity.getSpritesheet().setKey(digit.key);
+    		
+    		//render animation
+    		entity.render(canvas);
+    	}
+    }
+    
+    /**
+     * This class will keep track of each digit in our score
+     */
+    private class DigitScore
+    {
+    	protected int x;
+    	protected NumberKey key;
+    	
+    	private DigitScore(final int x, final NumberKey key)
+    	{
+    		this.x = x;
+    		this.key = key;
+    	}
     }
     
     /**

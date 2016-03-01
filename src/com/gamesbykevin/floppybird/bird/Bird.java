@@ -267,7 +267,10 @@ public class Bird extends Entity implements ICommon
 		final float current = (float)DROP_HEIGHT_MAX - (float)getDY();
 		
 		//find out how much we have progressed towards the full range
-		final float progress = (current / range);
+		float progress = (current / range);
+		
+		if (isDead())
+			progress = 0;
 		
 		//now we can assign the rotation
 		setRotation(45 - (90 * progress));
