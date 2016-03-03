@@ -10,6 +10,7 @@ import com.gamesbykevin.floppybird.common.ICommon;
 import com.gamesbykevin.floppybird.entity.Entity;
 import com.gamesbykevin.floppybird.game.Game;
 import com.gamesbykevin.floppybird.panel.GamePanel;
+import com.gamesbykevin.floppybird.storage.score.Score;
 
 import android.graphics.Canvas;
 
@@ -149,6 +150,7 @@ public final class Pipes extends Entity implements ICommon
 						
 						//increase score
 						game.getScoreboard().setCurrentScore(game.getScoreboard().getCurrentScore() + 1);
+						game.getDigits().setNumber(game.getScoreboard().getCurrentScore(), 0, Score.SCORE_Y, true);
 					}
 				}
 			}

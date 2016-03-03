@@ -18,6 +18,8 @@ import com.gamesbykevin.androidframework.screen.Screen;
 import com.gamesbykevin.floppybird.MainActivity;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.panel.GamePanel;
+import com.gamesbykevin.floppybird.storage.score.Digits;
+import com.gamesbykevin.floppybird.storage.score.Score;
 
 /**
  * The game over screen
@@ -28,16 +30,7 @@ public class GameoverScreen implements Screen, Disposable
     //our main screen reference
     private final ScreenManager screen;
     
-    //object to paint message
-    private Paint paint;
-    
-    //the messages to display
-    private String message = "";
-    
-    //where we draw the images and text
-    private int messageX = 0, messageY = 0;
-    
-    //time we have displayed text
+    //timer
     private long time;
     
     /**
@@ -60,6 +53,16 @@ public class GameoverScreen implements Screen, Disposable
     
     //list of buttons
     private HashMap<Key, Button> buttons;
+    
+    /**
+     * x-coordinate at which to display message board
+     */
+    private static final int MESSAGE_X = 136;
+    
+    /**
+     * y-coordinate at which to display message board
+     */
+    private static final int MESSAGE_Y = 20;
     
     /**
      * Keys to access each button
@@ -149,36 +152,6 @@ public class GameoverScreen implements Screen, Disposable
         
         //remove the selection
         setSelection(null);
-    }
-    
-    /**
-     * Assign the message
-     * @param message The message we want displayed
-     */
-    public void setMessage(final String message)
-    {
-        //assign the message(s)
-        this.message = message;
-        
-        //create temporary rectangle
-        Rect tmp = new Rect();
-        
-        //create paint text object for the message
-        if (this.paint == null)
-        {
-	        //assign metrics
-        	this.paint = new Paint();
-        	//this.paint.setTypeface(Font.getFont(Assets.FontGameKey.Default));
-        	this.paint.setColor(Color.WHITE);
-        	this.paint.setTextSize(64f);
-        }
-        
-        //get the rectangle around the message
-        this.paint.getTextBounds(message, 0, message.length(), tmp);
-        
-        //calculate the position of the message
-        this.messageX = (GamePanel.WIDTH / 2) - (tmp.width() / 2);
-        this.messageY = (int)buttons.get(Key.Rate).getY() + 175;
     }
     
     /**
@@ -301,9 +274,6 @@ public class GameoverScreen implements Screen, Disposable
 			
 			//remove selection
 			setSelection(null);
-			
-            //remove messages
-            setMessage("");
     	}
     	else
     	{
@@ -333,9 +303,42 @@ public class GameoverScreen implements Screen, Disposable
             //only darken the background when the menu is displayed
             ScreenManager.darkenBackground(canvas);
             
-            //render message(s)
-            canvas.drawText(this.message, messageX, messageY, this.paint);
-        
+            //get the selected difficulty index
+            final int difficultyIndex = screen.getScreenOptions().getIndex(OptionsScreen.Key.Difficulty); 
+            
+            //previous best score
+            final int best = screen.getScreenGame().getGame().getScoreboard().getHighScore(difficultyIndex);
+            
+            //current best score
+            final int score = screen.getScreenGame().getGame().getScoreboard().getCurrentScore();
+            
+            switch (difficultyIndex)
+            {
+            	case 0:
+            	default:
+            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverNormal), MESSAGE_X, MESSAGE_Y, null);
+            		break;
+            		
+	            case 1:
+            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverHard), MESSAGE_X, MESSAGE_Y, null);
+	            	break;
+	            	
+	            case 2:
+            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverEasy), MESSAGE_X, MESSAGE_Y, null);
+	            	break;
+            }
+            
+            //get our digits object reference
+            final Digits digits = screen.getScreenGame().getGame().getDigits();
+            
+            //position and assign number, then render
+            digits.setNumber(score, MESSAGE_X + 160, 100, false);
+            digits.render(canvas);
+            
+            //position and assign number, then render
+            digits.setNumber(best, MESSAGE_X + 160, 190, false);
+            digits.render(canvas);
+            
             //render the buttons
             for (Key key : Key.values())
             {
@@ -347,9 +350,6 @@ public class GameoverScreen implements Screen, Disposable
     @Override
     public void dispose()
     {
-        if (paint != null)
-        	paint = null;
-        
         if (buttons != null)
         {
         	for (Key key : Key.values())

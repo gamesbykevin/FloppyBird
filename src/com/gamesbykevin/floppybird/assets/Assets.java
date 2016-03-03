@@ -63,7 +63,6 @@ public class Assets
      */
     public enum FontGameKey
     {
-    	ScoreFont
     	//Default
     }
     
@@ -76,6 +75,9 @@ public class Assets
     	Cancel, 
     	Confirm,
     	Facebook, 
+    	GameoverEasy,
+    	GameoverHard,
+    	GameoverNormal,
     	Instructions,
     	Logo,
     	Splash,

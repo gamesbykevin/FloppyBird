@@ -28,40 +28,13 @@ public class Score extends Internal
 	//list of score records
 	private List<Record> records;
 	
-	//the current score
-	private int currentScore = 0;
-	
-	//the paint object to render the current score
-	private Paint paint;
-	
-	//the entity to render the score
-	private Entity entity;
-	
-	//the dimensions of each number animation
-	private static final int NUMBER_WIDTH = 55;
-	private static final int NUMBER_HEIGHT = 78;
-	
-	private enum NumberKey
-	{
-		Zero(0), One(1), Two(2), Three(3), Four(4), 
-		Five(5), Six(6), Seven(7), Eight(8), Nine(9);
-		
-		
-		private int x, y = 0;
-		
-		private NumberKey(final int col)
-		{
-			x = col * NUMBER_WIDTH;
-		}
-	}
-	
-	//our array object for each digit in our score
-	private DigitScore[] digits;
-	
 	/**
 	 * The y-coordinate where the score is rendered
 	 */
-	private static final int SCORE_Y = 20;
+	public static final int SCORE_Y = 20;
+	
+	//the current score
+	private int currentScore = 0;
 	
 	/**
 	 * Create new score object to track high score
@@ -71,26 +44,6 @@ public class Score extends Internal
 	public Score(final OptionsScreen screen, final Activity activity) 
 	{
 		super(FILE_NAME, activity);
-		
-		//create new entity and set the dimensions
-		this.entity = new Entity();
-		this.entity.setWidth(NUMBER_WIDTH);
-		this.entity.setHeight(NUMBER_HEIGHT);
-		
-		//add all number animations
-		for (NumberKey key : NumberKey.values())
-		{
-			this.entity.getSpritesheet().add(key, new Animation(Images.getImage(Assets.ImageGameKey.numbers), key.x, key.y, NUMBER_WIDTH, NUMBER_HEIGHT));
-		}
-		
-		//set default animation
-		this.entity.getSpritesheet().setKey(NumberKey.Zero);
-		
-		//create font for the score render
-		this.paint = new Paint();
-		this.paint.setTypeface(Font.getFont(Assets.FontGameKey.ScoreFont));
-		this.paint.setTextSize(64f);
-		this.paint.setColor(Color.BLACK);
 		
 		//create list for our records
 		this.records = new ArrayList<Record>();
@@ -142,104 +95,21 @@ public class Score extends Internal
 	}
 	
 	/**
-	 * Assign the current score
-	 * @param currentScore The current score
-	 */
-	public void setCurrentScore(final int currentScore)
-	{
-		//assign the score
-		this.currentScore = currentScore;
-		
-    	//get the score and convert to string
-    	String tmpScore = String.valueOf(currentScore);
-    	
-		//update the digits
-    	if (this.digits == null || this.digits != null && this.digits.length != tmpScore.length())
-    		this.digits = new DigitScore[tmpScore.length()];
-		
-		//calculate the starting point
-    	int x = (GamePanel.WIDTH / 2) - ((tmpScore.length() * NUMBER_WIDTH) / 2);
-    	
-    	//index
-    	int index = 0;
-    	
-    	//assign the animations for each character
-    	for (char test : tmpScore.toCharArray())
-    	{
-    		//store the number key
-    		NumberKey tmp = null;
-    		
-    		//identify which animation
-    		switch (test)
-    		{
-	    		case '0':
-    			default:
-    				tmp = NumberKey.Zero;
-	    			break;
-	    			
-	    		case '1':
-	    			tmp = NumberKey.One;
-	    			break;
-	    			
-	    		case '2':
-	    			tmp = NumberKey.Two;
-	    			break;
-	    			
-	    		case '3':
-	    			tmp = NumberKey.Three;
-	    			break;
-	    			
-	    		case '4':
-	    			tmp = NumberKey.Four;
-	    			break;
-	    			
-	    		case '5':
-	    			tmp = NumberKey.Five;
-	    			break;
-	    			
-	    		case '6':
-	    			tmp = NumberKey.Six;
-	    			break;
-	    			
-	    		case '7':
-	    			tmp = NumberKey.Seven;
-	    			break;
-	    			
-	    		case '8':
-	    			tmp = NumberKey.Eight;
-	    			break;
-	    			
-	    		case '9':
-	    			tmp = NumberKey.Nine;
-	    			break;
-    		}
-    		
-    		if (this.digits[index] == null)
-    		{
-    			this.digits[index] = new DigitScore(x, tmp);
-    		}
-    		else
-    		{
-    			//update
-    			this.digits[index].x = x;
-    			this.digits[index].key = tmp;
-    		}
-    		
-    		//change index
-    		index++;
-    		
-    		//adjust x-coordinate
-    		x += NUMBER_WIDTH;
-    	}
-	}
-	
-	/**
 	 * Get the current score
-	 * @return the current score
+	 * @return The current score
 	 */
 	public int getCurrentScore()
 	{
 		return this.currentScore;
+	}
+	
+	/**
+	 * Set the current score
+	 * @param currentScore The current score
+	 */
+	public void setCurrentScore(final int currentScore)
+	{
+		this.currentScore = currentScore;
 	}
 	
     /**
@@ -345,41 +215,6 @@ public class Score extends Internal
         	records.clear();
         	records = null;
         }
-    }
-	
-    /**
-     * Render the current score
-     * @param canvas
-     */
-    public void render(final Canvas canvas) throws Exception
-    {
-    	for (DigitScore digit : digits)
-    	{
-    		//assign location
-    		entity.setX(digit.x);
-    		entity.setY(SCORE_Y);
-    		
-    		//assign animation
-    		entity.getSpritesheet().setKey(digit.key);
-    		
-    		//render animation
-    		entity.render(canvas);
-    	}
-    }
-    
-    /**
-     * This class will keep track of each digit in our score
-     */
-    private class DigitScore
-    {
-    	protected int x;
-    	protected NumberKey key;
-    	
-    	private DigitScore(final int x, final NumberKey key)
-    	{
-    		this.x = x;
-    		this.key = key;
-    	}
     }
     
     /**

@@ -18,6 +18,7 @@ import com.gamesbykevin.floppybird.pipes.Pipes;
 import com.gamesbykevin.floppybird.screen.OptionsScreen;
 import com.gamesbykevin.floppybird.screen.ScreenManager;
 import com.gamesbykevin.floppybird.screen.ScreenManager.State;
+import com.gamesbykevin.floppybird.storage.score.Digits;
 import com.gamesbykevin.floppybird.storage.score.Score;
 
 /**
@@ -43,6 +44,9 @@ public final class Game implements IGame
     
     //track the best score for each mode index
     private Score scoreboard;
+    
+    //object used to render a nice looking number
+    private Digits digits;
     
     //the duration we want to vibrate the phone for
     private static final long VIBRATION_DURATION = 500L;
@@ -71,6 +75,9 @@ public final class Game implements IGame
         
         //create our pipes container
         this.pipes = new Pipes(this);
+        
+        //create new instance
+        this.digits = new Digits();
     }
     
     /**
@@ -80,6 +87,15 @@ public final class Game implements IGame
     public ScreenManager getScreen()
     {
         return this.screen;
+    }
+    
+    /**
+     * Get the digits
+     * @return Object used to render numbers
+     */
+    public Digits getDigits()
+    {
+    	return this.digits;
     }
     
     /**
@@ -119,13 +135,7 @@ public final class Game implements IGame
     	
     	//if the game is flagged as over 
     	if (hasGameover())
-    	{
-    		//change the state
     		getScreen().setState(State.GameOver);
-    		
-    		//set default text, for now
-    		getScreen().getScreenGameover().setMessage("Game Over");
-    	}
     }
     
     /**
@@ -159,6 +169,7 @@ public final class Game implements IGame
         	
         	//reset current score
         	getScoreboard().setCurrentScore(0);
+        	getDigits().setNumber(0, 0, Score.SCORE_Y, true);
         	
     		//reset depending on the difficulty
     		switch (getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Difficulty))
@@ -347,8 +358,8 @@ public final class Game implements IGame
     			getBird().render(canvas);
     		
     		//render current score
-    		if (getScoreboard() != null)
-    			getScoreboard().render(canvas);
+    		if (getDigits() != null)
+    			getDigits().render(canvas);
     	}
     }
     
