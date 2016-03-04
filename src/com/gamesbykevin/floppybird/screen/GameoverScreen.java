@@ -17,6 +17,7 @@ import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.androidframework.screen.Screen;
 import com.gamesbykevin.floppybird.MainActivity;
 import com.gamesbykevin.floppybird.assets.Assets;
+import com.gamesbykevin.floppybird.game.Game;
 import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.storage.score.Digits;
 import com.gamesbykevin.floppybird.storage.score.Score;
@@ -77,6 +78,9 @@ public class GameoverScreen implements Screen, Disposable
     //the menu selection made
     private Key selection = null;
     
+    //did we set a new record
+    private boolean success = false;
+    
     /**
      * Create the game over screen
      * @param screen Parent screen manager object
@@ -90,8 +94,8 @@ public class GameoverScreen implements Screen, Disposable
         this.buttons = new HashMap<Key, Button>();
         
         //the start location of the button
-        int y = ScreenManager.BUTTON_Y;
-        int x = ScreenManager.BUTTON_X;
+        int y = ScreenManager.BUTTON_Y + ScreenManager.BUTTON_Y_INCREMENT;
+        int x = 138;
 
         //create our buttons
         addButton(x, y, Key.Restart, BUTTON_TEXT_NEW_GAME);
@@ -289,7 +293,17 @@ public class GameoverScreen implements Screen, Disposable
 	            	//display the menu
 	            	setDisplay(true);
 	
-	                //anything else to do here?
+	                //check the player score to see if it is a personal best
+	            	/**
+	            	 * Check the player score to see if we set a personal best
+	            	 */
+	            	final Game game = screen.getScreenGame().getGame();
+	            	
+	            	//get the current difficulty setting
+	            	final int difficultyIndex = screen.getScreenOptions().getIndex(OptionsScreen.Key.Difficulty);
+	            	
+	            	//check if we set a record
+	            	success = game.getScoreboard().updateScore(difficultyIndex, game.getScoreboard().getCurrentScore());
 	            }
 	        }
     	}
@@ -338,6 +352,14 @@ public class GameoverScreen implements Screen, Disposable
             //position and assign number, then render
             digits.setNumber(best, MESSAGE_X + 160, 190, false);
             digits.render(canvas);
+            
+            //if new record, show image else display game over
+            	canvas.drawBitmap(
+            		(success) ? Images.getImage(Assets.ImageMenuKey.Record) : Images.getImage(Assets.ImageMenuKey.Gameover), 
+            		MESSAGE_X + 50, 
+            		MESSAGE_Y, 
+            		null
+            	);
             
             //render the buttons
             for (Key key : Key.values())

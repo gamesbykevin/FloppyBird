@@ -8,12 +8,10 @@ import android.os.Vibrator;
 import android.view.MotionEvent;
 
 import com.gamesbykevin.androidframework.resources.Audio;
-import com.gamesbykevin.androidframework.resources.Font;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.background.Background;
 import com.gamesbykevin.floppybird.bird.Bird;
-import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.pipes.Pipes;
 import com.gamesbykevin.floppybird.screen.OptionsScreen;
 import com.gamesbykevin.floppybird.screen.ScreenManager;
@@ -357,9 +355,12 @@ public final class Game implements IGame
     		if (getBird() != null)
     			getBird().render(canvas);
     		
-    		//render current score
-    		if (getDigits() != null)
+    		//render current score as long as the bird is alive
+    		if (getDigits() != null && !getBird().isDead())
     			getDigits().render(canvas);
+    		
+    		//render the ground
+    		getScreen().getBackground().renderAnimation(canvas, Background.Key.Ground);
     	}
     }
     

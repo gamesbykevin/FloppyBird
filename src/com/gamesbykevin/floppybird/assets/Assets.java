@@ -75,11 +75,13 @@ public class Assets
     	Cancel, 
     	Confirm,
     	Facebook, 
+    	Gameover,
     	GameoverEasy,
     	GameoverHard,
     	GameoverNormal,
     	Instructions,
     	Logo,
+    	Record,
     	Splash,
     	Twitter
     }

@@ -19,7 +19,7 @@ public class Background extends Entity implements ICommon
 	/**
 	 * The Key for each image etc...
 	 */
-	private enum Key
+	public enum Key
 	{
 		Ground(0, 1002, 800, GROUND_HEIGHT, 422, true), 
 		Sky(0, 0, 800, 450, 0, false), 
@@ -231,12 +231,12 @@ public class Background extends Entity implements ICommon
 	}
 	
 	/**
-	 * Render the specific animation
+	 * Render a specific animation
 	 * @param canvas
 	 * @param key
 	 * @throws Exception
 	 */
-	private void renderAnimation(final Canvas canvas, final Key key) throws Exception
+	public void renderAnimation(final Canvas canvas, final Key key) throws Exception
 	{
 		super.getSpritesheet().setKey(key);
 		super.setWidth(key.animationW);
