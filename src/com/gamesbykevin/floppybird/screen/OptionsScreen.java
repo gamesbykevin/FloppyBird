@@ -36,7 +36,7 @@ public class OptionsScreen implements Screen, Disposable
     //buttons to access each button in the list
     public enum Key
     {
-    	Back, Sound, Vibrate, Difficulty, Instructions, Facebook, Twitter
+    	Back, Sound, Vibrate, Difficulty, Mode, Instructions, Facebook, Twitter
     }
     
     //the user selection
@@ -68,8 +68,13 @@ public class OptionsScreen implements Screen, Disposable
         x += ScreenManager.BUTTON_X_INCREMENT;
         addButtonDifficulty(x, y);
         
-        //the back button
+        //add game mode
         x += ScreenManager.BUTTON_X_INCREMENT;
+        addButtonMode(x, y);
+        
+        //the back button
+        x = ScreenManager.BUTTON_X;
+        y += ScreenManager.BUTTON_Y_INCREMENT + (ScreenManager.BUTTON_Y_INCREMENT * .25);
         addButtonBack(x, y);
         
         //add social media icons after the above, because the dimensions are different
@@ -158,6 +163,16 @@ public class OptionsScreen implements Screen, Disposable
         this.buttons.put(Key.Sound, button);
     }
 
+    private void addButtonMode(final int x, final int y)
+    {
+        Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
+        button.addDescription("Mode: Endless");
+        button.addDescription("Mode: Survival");
+        button.setX(x);
+        button.setY(y);
+    	this.buttons.put(Key.Mode, button);
+    }
+    
     private void addButtonDifficulty(final int x, final int y)
     {
         Button button = new Button(Images.getImage(Assets.ImageMenuKey.Button));
@@ -241,6 +256,7 @@ public class OptionsScreen implements Screen, Disposable
 						case Sound:
 						case Vibrate:
 						case Difficulty:
+						case Mode:
 							button.positionText(getScreen().getPaint());
 							break;
 							
@@ -329,6 +345,7 @@ public class OptionsScreen implements Screen, Disposable
 	                
 				case Vibrate:
 				case Difficulty:
+				case Mode:
 					
 					//change index
 					button.setIndex(button.getIndex() + 1);
@@ -422,6 +439,7 @@ public class OptionsScreen implements Screen, Disposable
 	    			case Sound:
 	    			case Vibrate:
 	    			case Difficulty:
+	    			case Mode:
 	    				buttons.get(key).render(canvas, getScreen().getPaint());
 	    				break;
 	    				

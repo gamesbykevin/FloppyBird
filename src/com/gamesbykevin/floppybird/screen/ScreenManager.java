@@ -7,7 +7,6 @@ import android.graphics.Typeface;
 import com.gamesbykevin.androidframework.resources.Audio;
 
 import com.gamesbykevin.androidframework.resources.Disposable;
-import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.androidframework.screen.Screen;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.background.Background;
@@ -229,14 +228,11 @@ public final class ScreenManager implements Screen, Disposable
 	        	//if we are on the menu for the first time or coming from any state besides the options
 	        	if (getState() == null || getState() != State.Options)
 	        	{
-	        		if (getScreenGame() != null && getScreenGame().getGame() != null)
-	        			getScreenGame().getGame().getPipes().resetTime();
-	        		
 	        		//stop all sound
 	        		Audio.stop();
 	        		
 	        		//play menu theme
-	        		//Audio.play(Assets.AudioMenuKey.Theme, true);
+	        		Audio.play(Assets.AudioMenuKey.Music, true);
 	        	}
 	        }
 	        else if (state == State.Running)
@@ -244,8 +240,8 @@ public final class ScreenManager implements Screen, Disposable
 	        	//stop all sound
 	        	Audio.stop();
 	        	
-	        	//play song
-	        	//Audio.play(Assets.AudioGameKey.Music, true);
+	        	//play main theme music
+	        	Audio.play(Assets.AudioGameKey.Music, true);
 	        }
     	}
     	finally

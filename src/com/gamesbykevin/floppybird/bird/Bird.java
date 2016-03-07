@@ -1,6 +1,7 @@
 package com.gamesbykevin.floppybird.bird;
 
 import com.gamesbykevin.androidframework.anim.Animation;
+import com.gamesbykevin.androidframework.resources.Audio;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.background.Background;
@@ -8,8 +9,12 @@ import com.gamesbykevin.floppybird.common.ICommon;
 import com.gamesbykevin.floppybird.entity.Entity;
 import com.gamesbykevin.floppybird.game.Game;
 import com.gamesbykevin.floppybird.panel.GamePanel;
+import com.gamesbykevin.floppybird.screen.OptionsScreen;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 
 public class Bird extends Entity implements ICommon
 {
@@ -45,6 +50,19 @@ public class Bird extends Entity implements ICommon
 	private boolean dead = false;
 	
 	/**
+	 * The maximum amount of fuel allowed
+	 */
+	private static final int FUEL_MAX = 500;
+	
+	/**
+	 * The allowed amount of fuel to add
+	 */
+	private static final int FUEL_ADD = 40;
+	
+	//the amount of fuel the bird has
+	private int fuel = FUEL_MAX;
+	
+	/**
 	 * Array of x-coordinates that make up the bird, used for collision detection
 	 */
 	private static final int[] BIRD_X_POINTS = new int[] {-24, -13, 6, 17, 24, 24, 37, 27, 18, -1, -23, -25};
@@ -53,6 +71,38 @@ public class Bird extends Entity implements ICommon
 	 * Array of y-coordinates that make up the bird, used for collision detection
 	 */
 	private static final int[] BIRD_Y_POINTS = new int[] {-4, -15, -17, -12, -5, 3, 10, 10, 14, 19, 10, 5};
+	
+	
+	/**
+	 * The width of the fuel tank we will render
+	 */
+	private static final int FUEL_WIDTH = (int)(GamePanel.WIDTH * .75);
+	
+	//the width of the fuel tank
+	private int width =  FUEL_WIDTH;
+	
+	/**
+	 * The starting x-coordinate of the fuel tank
+	 */
+	private static final int FUEL_X = 100;
+	
+	/**
+	 * The height of the fuel tank
+	 */
+	private static final int FUEL_HEIGHT = Background.GROUND_HEIGHT / 2;
+	
+	/**
+	 * The starting y-coordinate of the fuel tank
+	 */
+	private static final int FUEL_Y = GamePanel.HEIGHT - FUEL_HEIGHT - (FUEL_HEIGHT / 2);
+	
+	/**
+	 * The transparency of the color in the fuel tank
+	 */
+	private static final int FUEL_ALPHA = 120;
+	
+	//the paint object to render the fuel tank
+	private Paint paint;
 	
 	//game reference object
 	private final Game game;
@@ -64,6 +114,10 @@ public class Bird extends Entity implements ICommon
 	{
 		//store our game reference object
 		this.game = game;
+		
+		//create paint object
+		this.paint = new Paint();
+		this.paint.setStyle(Style.FILL);
 		
 		//add these animations
 		addAnimation(Assets.ImageGameKey.bird1, 75, 52);
@@ -78,11 +132,60 @@ public class Bird extends Entity implements ICommon
 	}
 	
 	/**
+	 * Increase our fuel amount
+	 */
+	public void addFuel()
+	{
+		setFuel(getFuel() + FUEL_ADD);
+	}
+	
+	/**
+	 * Assign the fuel
+	 * @param fuel The desired amount
+	 */
+	private final void setFuel(final int fuel)
+	{
+		this.fuel = fuel;
+		
+		//make sure we stay in the boundary
+		if (getFuel() < 0)
+			setFuel(0);
+		if (getFuel() > FUEL_MAX)
+			setFuel(FUEL_MAX);
+	}
+	
+	/**
+	 * Get the fuel
+	 * @return The amount of fuel left
+	 */
+	public final int getFuel()
+	{
+		return this.fuel;
+	}
+	
+	/**
 	 * Flag the bird dead
 	 * @param dead true = yes, false = no
 	 */
 	public final void setDead(final boolean dead)
 	{
+		//if we weren't dead and am now for the first time
+		if (!isDead() && dead)
+		{
+			//stop the music
+			Audio.stop();
+			
+			//play dead audio sound effect
+			Audio.play(Assets.AudioGameKey.Dead);
+			
+			//flag game over
+			game.setGameover(true);
+			
+			//vibrate phone
+			game.vibrate();
+		}
+
+		
 		this.dead = dead;
 	}
 	
@@ -182,6 +285,12 @@ public class Bird extends Entity implements ICommon
 		
 		//set the height based on the current animation
 		super.setHeight(getSpritesheet().get().getImage().getHeight());
+		
+		//reset the fuel
+		setFuel(FUEL_MAX);
+		
+		//set the color
+		assignFuelColor();
 	}
 	
 	@Override
@@ -207,6 +316,35 @@ public class Bird extends Entity implements ICommon
 		
 		//reset the current animation
 		super.getSpritesheet().get().reset();
+	}
+	
+	/**
+	 * Assign the appropriate color to display by the amount of fuel remaining
+	 */
+	private void assignFuelColor()
+	{
+		//find out how full/empty the fuel tank is
+		final float progress = (((float)getFuel() / (float)FUEL_MAX) * 100);
+		
+		if (progress >= 75)
+		{
+			paint.setColor(Color.GREEN);
+		}
+		else if (progress >= 50)
+		{
+			paint.setColor(Color.YELLOW);
+		}
+		else if (progress >= 25)
+		{
+			paint.setColor(Color.argb(255, 255, 165, 0));
+		}
+		else
+		{
+			paint.setColor(Color.RED);
+		}
+		
+		//set the transparency of the color
+		paint.setAlpha(FUEL_ALPHA);
 	}
 	
 	@Override
@@ -246,12 +384,23 @@ public class Bird extends Entity implements ICommon
 			//position bird right above the ground
 			setY(GamePanel.HEIGHT - Background.GROUND_HEIGHT - getHeight());
 			
-			//flag game over true
-			if (!isDead())
-				game.setGameover(true);
-			
 			//flag the bird as dead
 			setDead(true);
+		}
+		else if (game.getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Mode) == 1)
+		{
+			//if no more fuel, game over
+			if (getFuel() <= 0)
+				setDead(true);
+			
+			//decrease the fuel
+			setFuel(getFuel() - 1);
+			
+			//set the color
+			assignFuelColor();
+			
+			//determine the width of the fuel tank
+			this.width = (int) (FUEL_WIDTH * ((double)getFuel() / (double)FUEL_MAX));
 		}
 	}
 	
@@ -290,5 +439,9 @@ public class Bird extends Entity implements ICommon
         
         //restore canvas to previous state so only this object is affected
         canvas.restore();
+        
+		//check the game mode is challenge to see if we render the fuel tank
+		if (game.getScreen().getScreenOptions().getIndex(OptionsScreen.Key.Mode) == 1)
+			canvas.drawRect(FUEL_X, FUEL_Y, FUEL_X + width, FUEL_Y + FUEL_HEIGHT, paint);
 	}
 }

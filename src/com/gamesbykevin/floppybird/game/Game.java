@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.os.Vibrator;
 import android.view.MotionEvent;
 
-import com.gamesbykevin.androidframework.resources.Audio;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.background.Background;
@@ -54,6 +53,9 @@ public final class Game implements IGame
     
     //collection of pipes
     private Pipes pipes;
+    
+    //did the user press the screen
+    private boolean press = false;
     
     /**
      * Create our game object
@@ -265,25 +267,24 @@ public final class Game implements IGame
     	
     	if (action == MotionEvent.ACTION_UP)
     	{
-    		if (getBird() != null)
-    		{
-    			//did the bird start yet
-    			final boolean started = getBird().hasStart();
-    			
-    			//start jumping
-    			getBird().jump();
-    			
-    			if (!started)
-    				getPipes().resetTime();
-    		}
+    		//flag press false
+    		press = false;
     	}
     	else if (action == MotionEvent.ACTION_DOWN)
 		{
-			
+			if (!press)
+			{
+				//flag press true
+				press = true;
+				
+				//start jumping
+	    		if (getBird() != null)
+	    			getBird().jump();
+			}
 		}
 		else if (action == MotionEvent.ACTION_MOVE)
     	{
-			
+			//do something here?
     	}
     }
     
@@ -350,10 +351,6 @@ public final class Game implements IGame
     		//render pipes
         	if (getPipes() != null)
         		getPipes().render(canvas);
-        	
-        	//render bird
-    		if (getBird() != null)
-    			getBird().render(canvas);
     		
     		//render current score as long as the bird is alive
     		if (getDigits() != null && !getBird().isDead())
@@ -361,6 +358,10 @@ public final class Game implements IGame
     		
     		//render the ground
     		getScreen().getBackground().renderAnimation(canvas, Background.Key.Ground);
+    		
+        	//render the bird last
+    		if (getBird() != null)
+    			getBird().render(canvas);
     	}
     }
     

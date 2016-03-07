@@ -1,10 +1,6 @@
 package com.gamesbykevin.floppybird.screen;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.view.MotionEvent;
 
 import java.util.HashMap;
@@ -12,15 +8,12 @@ import java.util.HashMap;
 import com.gamesbykevin.androidframework.awt.Button;
 import com.gamesbykevin.androidframework.resources.Audio;
 import com.gamesbykevin.androidframework.resources.Disposable;
-import com.gamesbykevin.androidframework.resources.Font;
 import com.gamesbykevin.androidframework.resources.Images;
 import com.gamesbykevin.androidframework.screen.Screen;
 import com.gamesbykevin.floppybird.MainActivity;
 import com.gamesbykevin.floppybird.assets.Assets;
 import com.gamesbykevin.floppybird.game.Game;
-import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.storage.score.Digits;
-import com.gamesbykevin.floppybird.storage.score.Score;
 
 /**
  * The game over screen
@@ -299,11 +292,14 @@ public class GameoverScreen implements Screen, Disposable
 	            	 */
 	            	final Game game = screen.getScreenGame().getGame();
 	            	
+	                //get the selected mode index
+	                final int modeIndex = screen.getScreenOptions().getIndex(OptionsScreen.Key.Mode);
+	            	
 	            	//get the current difficulty setting
 	            	final int difficultyIndex = screen.getScreenOptions().getIndex(OptionsScreen.Key.Difficulty);
 	            	
 	            	//check if we set a record
-	            	success = game.getScoreboard().updateScore(difficultyIndex, game.getScoreboard().getCurrentScore());
+	            	success = game.getScoreboard().updateScore(modeIndex, difficultyIndex, game.getScoreboard().getCurrentScore());
 	            }
 	        }
     	}
@@ -320,37 +316,62 @@ public class GameoverScreen implements Screen, Disposable
             //get the selected difficulty index
             final int difficultyIndex = screen.getScreenOptions().getIndex(OptionsScreen.Key.Difficulty); 
             
+            //get the selected mode index
+            final int modeIndex = screen.getScreenOptions().getIndex(OptionsScreen.Key.Mode);
+            
             //previous best score
-            final int best = screen.getScreenGame().getGame().getScoreboard().getHighScore(difficultyIndex);
+            final int best = screen.getScreenGame().getGame().getScoreboard().getHighScore(modeIndex, difficultyIndex);
             
             //current best score
             final int score = screen.getScreenGame().getGame().getScoreboard().getCurrentScore();
             
-            switch (difficultyIndex)
+            //if endless mode
+            if (screen.getScreenOptions().getIndex(OptionsScreen.Key.Mode) == 0)
             {
-            	case 0:
-            	default:
-            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverNormal), MESSAGE_X, MESSAGE_Y, null);
-            		break;
-            		
-	            case 1:
-            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverHard), MESSAGE_X, MESSAGE_Y, null);
-	            	break;
-	            	
-	            case 2:
-            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverEasy), MESSAGE_X, MESSAGE_Y, null);
-	            	break;
+	            switch (difficultyIndex)
+	            {
+	            	case 0:
+	            	default:
+	            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverNormalEndless), MESSAGE_X, MESSAGE_Y, null);
+	            		break;
+	            		
+		            case 1:
+	            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverHardEndless), MESSAGE_X, MESSAGE_Y, null);
+		            	break;
+		            	
+		            case 2:
+	            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverEasyEndless), MESSAGE_X, MESSAGE_Y, null);
+		            	break;
+	            }
+            }
+            else
+            {
+	            switch (difficultyIndex)
+	            {
+	            	case 0:
+	            	default:
+	            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverNormalSurvival), MESSAGE_X, MESSAGE_Y, null);
+	            		break;
+	            		
+		            case 1:
+	            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverHardSurvival), MESSAGE_X, MESSAGE_Y, null);
+		            	break;
+		            	
+		            case 2:
+	            		canvas.drawBitmap(Images.getImage(Assets.ImageMenuKey.GameoverEasySurvival), MESSAGE_X, MESSAGE_Y, null);
+		            	break;
+	            }
             }
             
             //get our digits object reference
             final Digits digits = screen.getScreenGame().getGame().getDigits();
             
             //position and assign number, then render
-            digits.setNumber(score, MESSAGE_X + 160, 100, false);
+            digits.setNumber(score, MESSAGE_X + 210, 110, false);
             digits.render(canvas);
             
             //position and assign number, then render
-            digits.setNumber(best, MESSAGE_X + 160, 190, false);
+            digits.setNumber(best, MESSAGE_X + 210, 200, false);
             digits.render(canvas);
             
             //if new record, show image else display game over

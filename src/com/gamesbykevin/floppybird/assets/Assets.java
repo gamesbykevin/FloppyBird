@@ -76,9 +76,12 @@ public class Assets
     	Confirm,
     	Facebook, 
     	Gameover,
-    	GameoverEasy,
-    	GameoverHard,
-    	GameoverNormal,
+    	GameoverEasyEndless,
+    	GameoverEasySurvival,
+    	GameoverHardEndless,
+    	GameoverHardSurvival,
+    	GameoverNormalEndless,
+    	GameoverNormalSurvival,
     	Instructions,
     	Logo,
     	Record,
@@ -92,7 +95,7 @@ public class Assets
      */
     public enum ImageGameKey
     {
-    	bird1, bird2, bird3, bird4, numbers, pipe, pipe1, sheet
+    	bird1, bird2, bird3, bird4, fuel, numbers, pipe, pipe1, sheet
     }
     
     /**
@@ -110,6 +113,7 @@ public class Assets
      */
     public enum AudioMenuKey
     {
+    	Music,
     	Selection 
     }
     
@@ -119,7 +123,7 @@ public class Assets
      */
     public enum AudioGameKey
     {
-    	//Explosion, Lose, Music, Tone1, Tone2, Tone3, Tone4, Tone5, Win
+    	Dead, Fuel, Music, Score
     }
     
     /**

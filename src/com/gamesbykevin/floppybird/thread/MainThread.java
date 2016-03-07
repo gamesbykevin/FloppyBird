@@ -14,7 +14,7 @@ public class MainThread extends Thread
     /**
      * Is debug mode enabled?
      */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     
     /**
      * The default time to sleep when paused

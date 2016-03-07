@@ -3,20 +3,11 @@ package com.gamesbykevin.floppybird.storage.score;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gamesbykevin.androidframework.anim.Animation;
-import com.gamesbykevin.androidframework.base.Entity;
 import com.gamesbykevin.androidframework.io.storage.Internal;
-import com.gamesbykevin.androidframework.resources.Font;
-import com.gamesbykevin.androidframework.resources.Images;
-import com.gamesbykevin.floppybird.assets.Assets;
-import com.gamesbykevin.floppybird.panel.GamePanel;
 import com.gamesbykevin.floppybird.screen.OptionsScreen;
 import com.gamesbykevin.floppybird.storage.settings.Settings;
 
 import android.app.Activity;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 
 public class Score extends Internal 
 {
@@ -37,6 +28,11 @@ public class Score extends Internal
 	private int currentScore = 0;
 	
 	/**
+	 * The character to separate each stat apart
+	 */
+	private static final String SEPARATOR_STAT = "-";
+	
+	/**
 	 * Create new score object to track high score
 	 * @param screen Object to reference that has the modes we are tracking
 	 * @param activity Object needed to write data to internal storage
@@ -50,42 +46,47 @@ public class Score extends Internal
 		
         try
         {
-            //get the # of the modes in the settings
-            final int length = screen.getButtons().get(OptionsScreen.Key.Difficulty).getDescriptions().size();
+            //get the # of difficulties in the settings
+            final int difficultyLength = screen.getButtons().get(OptionsScreen.Key.Difficulty).getDescriptions().size();
+            
+            //get the # of game modes from the settings
+            final int modeLength = screen.getButtons().get(OptionsScreen.Key.Mode).getDescriptions().size();
             
             //if content exists load it
             if (super.getContent().toString().trim().length() > 0)
             {
-                //split the content into an array (each score for each mode)
-                final String[] data = super.getContent().toString().split(Settings.SEPARATOR);
+                //split the content into an array (each record is separated by a specific character)
+                final String[] records = super.getContent().toString().split(Settings.SEPARATOR);
                 
-                //load the score of each difficulty
-                for (int difficultyIndex = 0; difficultyIndex < length; difficultyIndex++)
+                //loop through each record
+                for (int index = 0; index < records.length; index++)
                 {
-                	//if we are out of bounds of the existing data array, there is a new difficulty we need to track the high score
-                	if (difficultyIndex >= data.length)
-                	{
-                		//add default score to our array list
-	                	this.records.add(new Record(difficultyIndex, 0));
-                	}
-                	else
-                	{
-	                	//get the score for the specified difficulty index
-	                	final int score = Integer.parseInt(data[difficultyIndex]);
-	                	
-	                	//add loaded score to our array list
-	                	this.records.add(new Record(difficultyIndex, score));
-                	}
+                	//separate each stat for the current record
+                	final String[] stats = records[index].split(SEPARATOR_STAT);
+                	
+                	//the mode
+                	final int modeIndex = Integer.parseInt(stats[0]);
+                	
+                	//the difficulty
+                	final int difficultyIndex = Integer.parseInt(stats[1]);
+                	
+                	//get the score for the specified difficulty index
+                	final int score = Integer.parseInt(stats[2]);
+                	
+                	//add loaded score to our array list
+                	this.records.add(new Record(modeIndex, difficultyIndex, score));
                 }
             }
             else
             {
-            	//else set a default score for each difficulty
-                for (int difficultyIndex = 0; difficultyIndex < length; difficultyIndex++)
-                {
-                	//add default 0 score
-                	this.records.add(new Record(difficultyIndex, 0));
-                }
+            	//add default 0 score for all
+            	for (int modeIndex = 0; modeIndex < modeLength; modeIndex++)
+            	{
+	                for (int difficultyIndex = 0; difficultyIndex < difficultyLength; difficultyIndex++)
+	                {
+	                	this.records.add(new Record(modeIndex, difficultyIndex, 0));
+	                }
+            	}
             }
         }
         catch (Exception e)
@@ -126,14 +127,26 @@ public class Score extends Internal
             //save every record in our array list, to the internal storage
             for (Record record : records)
             {
+            	//add the game mode
+            	super.getContent().append(record.getMode());
+            	
+            	//separate the stats
+            	super.getContent().append(SEPARATOR_STAT);
+            	
+            	//add the difficulty
+            	super.getContent().append(record.getDifficulty());
+            	
+            	//separate the stats
+            	super.getContent().append(SEPARATOR_STAT);
+            	
             	//add score
             	super.getContent().append(record.getScore());
             	
-            	//add delimiter to separate each difficulty score
+            	//add delimiter to separate each record
         		super.getContent().append(Settings.SEPARATOR);
             }
             
-            //remove the last character since there won't be any additional settings
+            //remove the last character since there won't be any additional elements
             super.getContent().deleteCharAt(super.getContent().length() - 1);
 
             //save data
@@ -147,16 +160,21 @@ public class Score extends Internal
     
     /**
      * Get the high score
+     * @param modeIndex The specified mode index
      * @param difficultyIndex The specified difficulty index
      * @return The high score for the specified difficulty index
      */
-    public int getHighScore(final int difficultyIndex)
+    public int getHighScore(final int modeIndex, final int difficultyIndex)
     {
     	//check each record
     	for (Record record : records)
     	{
-    		//if the mode does not match, skip it
+    		//if the difficulty does not match, skip it
     		if (record.getDifficulty() != difficultyIndex)
+    			continue;
+    		
+    		//if the mode does not match, skip it
+    		if (record.getMode() != modeIndex)
     			continue;
     		
     		//return our score
@@ -169,17 +187,22 @@ public class Score extends Internal
     
     /**
      * Update the score
+     * @param modeIndex The game mode played
      * @param difficultyIndex The difficulty we are checking
      * @param score The score we are checking
      * @return true if the score was updated with a new record, false otherwise
      */
-    public boolean updateScore(final int difficultyIndex, final int score)
+    public boolean updateScore(final int modeIndex, final int difficultyIndex, final int score)
     {
     	//check each record
     	for (Record record : records)
     	{
     		//if the difficulty does not match, skip it
     		if (record.getDifficulty() != difficultyIndex)
+    			continue;
+    		
+    		//if the mode does not match, skip it
+    		if (record.getMode() != modeIndex)
     			continue;
     		
     		//if the score is bigger, we have a new record
@@ -223,15 +246,18 @@ public class Score extends Internal
 	private class Record
 	{
 		private final int difficulty;
+		private final int mode;
 		private int score;
 		
 		/**
 		 * Create record of score
+		 * @param mode The game mode played
 		 * @param difficulty The difficulty the score is for
 		 * @param score The score for that mode
 		 */
-		public Record(final int difficulty, final int score)
+		public Record(final int mode, final int difficulty, final int score)
 		{
+			this.mode = mode;
 			this.difficulty = difficulty;
 			setScore(score);
 		}
@@ -239,6 +265,8 @@ public class Score extends Internal
 		private int getDifficulty() { return this.difficulty; }
 		
 		private int getScore() { return this.score; }
+		
+		private int getMode() { return this.mode; }
 		
 		private final void setScore(final int score) { this.score = score; }
 	}
